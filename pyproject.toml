@@ -8,9 +8,11 @@ authors = ["HM <hieumdd@gmail.com>"]
 python = "~3.11"
 dacite = "^1.8.1"
 python-json-logger = "^2.0.7"
-httpx = "^0.26.0"
+httpx = ">=0.25,<1.0"
 pyjwt = "^2.8.0"
 cryptography = "^42.0.0"
+python-telegram-bot = "^20.7"
+schedule = "^1.2.1"
 
 
 [tool.poetry.group.dev.dependencies]
