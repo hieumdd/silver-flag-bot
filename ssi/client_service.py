@@ -19,7 +19,7 @@ class SSIAuth(httpx.Auth):
         if not self.token:
             return False
 
-        exp = jwt.decode(self.token, options={"verity_signature": False})["exp"]
+        exp = jwt.decode(self.token, options={"verify_signature": False})["exp"]
         if exp < datetime.now().timestamp():
             return False
 
