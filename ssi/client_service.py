@@ -45,6 +45,11 @@ class SSIAuth(httpx.Auth):
 
 
 class SSIClient:
+    def __new__(cls):
+        if not hasattr(cls, "instance"):
+            cls.instance = super(SSIClient, cls).__new__(cls)
+        return cls.instance
+
     def __init__(self):
         def validate_status_code(response: httpx.Response):
             response.raise_for_status()
@@ -62,17 +67,27 @@ class SSIClient:
         )
 
     def get_intraday(self, options: GetIntradayOptions):
-        response = self.client.request(
-            method="GET",
-            url="/IntradayOhlc",
-            params={
-                "Symbol": options.symbol,
-                "FromDate": options.from_date.strftime("%d/%m/%Y"),
-                "ToDate": options.to_date.strftime("%d/%m/%Y"),
-                "PageIndex": options.page_index,
-                "PageSize": options.page_size,
-                "resolution": options.resolution,
-                "ascending": options.ascending,
-            },
-        )
-        return response.json()
+        page_size = 1000
+
+        def _request(page_index=1):
+            data = (
+                self.client.request(
+                    method="GET",
+                    url="/IntradayOhlc",
+                    params={
+                        "Symbol": options.symbol,
+                        "FromDate": options.start_date.strftime("%d/%m/%Y"),
+                        "ToDate": options.end_date.strftime("%d/%m/%Y"),
+                        "PageIndex": page_index,
+                        "PageSize": page_size,
+                        "resolution": options.resolution,
+                        "ascending": options.ascending,
+                    },
+                )
+                .json()
+                .get("data", [])
+            )
+
+            return data if len(data) < page_size else [*data, *_request(page_index + 1)]
+
+        return _request()
