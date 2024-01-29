@@ -3,10 +3,11 @@ from functools import reduce
 import operator
 
 import pandas as pd
+from pandas.core.series import Series
 import pandas_ta as ta
 
 from ssi.client_model import GetIntradayOptions
-from trading.signal.enum import SignalEnum
+from trading.signal.enum import LongEntry, ShortEntry
 from trading.strategy.interface import Strategy
 
 
@@ -41,14 +42,17 @@ class MultiMA(Strategy):
                 f"EMA_{length}"
             ].shift(1)
 
+        for signal_type in [LongEntry, ShortEntry]:
+            _df[[signal_type.flag_col, signal_type.tag_col]] = (None, None)
+
         _df.loc[
             reduce(
                 operator.and_,
                 [_df[f"EMA_{length}_DIFF"] > 0 for length in self._range]
                 + [_df["RSI_CROSS_ABOVE"] == 1],
             ),
-            SignalEnum.LONG_ENTRY,
-        ] = True
+            [LongEntry.flag_col, LongEntry.tag_col],
+        ] = (True, "EMAs & RSI")
 
         _df.loc[
             reduce(
@@ -56,7 +60,7 @@ class MultiMA(Strategy):
                 [_df[f"EMA_{length}_DIFF"] < 0 for length in self._range]
                 + [_df["RSI_CROSS_BELOW"] == 1],
             ),
-            SignalEnum.SHORT_ENTRY,
-        ] = True
+            [ShortEntry.flag_col, ShortEntry.tag_col],
+        ] = (True, "EMAs & RSI")
 
         return _df

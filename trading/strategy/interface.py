@@ -1,11 +1,14 @@
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
+from itertools import chain
 from typing import Optional
 
 import pandas as pd
 
 from ssi.client_model import GetIntradayOptions
 from ssi.client_service import SSIClient
+from trading.signal.enum import LongEntry, ShortEntry
+from trading.signal.model import Signal
 
 
 class Strategy(metaclass=ABCMeta):
@@ -38,12 +41,30 @@ class Strategy(metaclass=ABCMeta):
     def populate_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         pass
 
-    def get_indicators(self, df: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def generate_indicators(self, df: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         return self.populate_indicators(df if df else self.get_data())
 
     @abstractmethod
     def populate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
         pass
 
-    def get_signals(self, df: Optional[pd.DataFrame] = None) -> pd.DataFrame:
-        return self.populate_signals(df if df else self.get_indicators())
+    def generate_signals(self, df: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+        return self.populate_signals(df if df else self.generate_indicators())
+
+    def get_signals(self, df: Optional[pd.DataFrame] = None):
+        _df = df if df is not None else self.generate_signals()
+        current_candle = _df.iloc[-1, :]
+        signals = [
+            [
+                Signal(
+                    type_,
+                    current_candle.name.to_pydatetime().isoformat(),
+                    str(current_candle["close"]),
+                    current_candle[type_.tag_col],
+                )
+            ]
+            if current_candle[type_.flag_col] == True
+            else []
+            for type_ in [LongEntry, ShortEntry]
+        ]
+        return list(chain(*signals))
