@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from ssi.client_service import SSIClient
-from ssi.client_model import GetIntradayOptions
+from ssi.client import SSIClient
+from ssi.options import GetIntradayOptions
 
 
 class TestClientService:

@@ -6,7 +6,7 @@ import pandas as pd
 from pandas.core.series import Series
 import pandas_ta as ta
 
-from ssi.client_model import GetIntradayOptions
+from ssi.options import GetIntradayOptions
 from trading.signal.enum import LongEntry, ShortEntry
 from trading.strategy.interface import Strategy
 

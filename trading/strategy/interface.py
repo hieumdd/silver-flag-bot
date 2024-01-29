@@ -5,8 +5,8 @@ from typing import Optional
 
 import pandas as pd
 
-from ssi.client_model import GetIntradayOptions
-from ssi.client_service import SSIClient
+from ssi.options import GetIntradayOptions
+from ssi.client import SSIClient
 from trading.signal.enum import LongEntry, ShortEntry
 from trading.signal.model import Signal
 

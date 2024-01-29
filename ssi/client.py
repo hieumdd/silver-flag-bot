@@ -4,7 +4,7 @@ import os
 import jwt
 import httpx
 
-from ssi.client_model import GetIntradayOptions
+from ssi.options import GetIntradayOptions
 
 DATA_API_BASE_URL = "https://fc-data.ssi.com.vn/api/v2/Market"
 
