@@ -53,8 +53,7 @@ class Strategy(metaclass=ABCMeta):
 
     def get_signals(self, df: Optional[pd.DataFrame] = None):
         _df = df if df is not None else self.generate_signals()
-        # current_candle = _df.iloc[-1, :]
-        current_candle = _df.loc[_df["ShortEntry"] == True].iloc[-1, :]
+        current_candle = _df.iloc[-1, :]
         signals = [
             [
                 Signal(
