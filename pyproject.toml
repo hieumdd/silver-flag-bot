@@ -10,7 +10,7 @@ python-json-logger = "^2.0.7"
 httpx = ">=0.25,<1.0"
 pyjwt = "^2.8.0"
 cryptography = "^42.0.0"
-python-telegram-bot = {extras = ["job-queue"], version = "^20.7"}
+python-telegram-bot = { extras = ["job-queue"], version = "^20.7" }
 pandas = "^2.2.0"
 pandas-ta = "^0.3.14b0"
 pyarrow = "^15.0.0"
@@ -20,10 +20,13 @@ emoji = "^2.10.0"
 [tool.poetry.group.dev.dependencies]
 black = "^23.11.0"
 mypy = "^1.7.0"
-python-dotenv = {extras = ["cli"], version = "^1.0.1"}
+python-dotenv = { extras = ["cli"], version = "^1.0.1" }
 pytest = "^7.4.4"
 pytest-dotenv = "^0.5.2"
 notebook = "^7.0.7"
+
+[tool.mypy]
+explicit_package_bases = true
 
 [tool.pytest.ini_options]
 python_files = "*_test.py"
