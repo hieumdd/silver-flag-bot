@@ -31,7 +31,7 @@ class Strategy(metaclass=ABCMeta):
             .astype({col_name: float for col_name in ohlc_columns})
         )
 
-        return df[ohlc_columns]
+        return df[["symbol", *ohlc_columns]]
 
     @abstractmethod
     def get_options(self) -> GetIntradayOptions:
@@ -53,11 +53,13 @@ class Strategy(metaclass=ABCMeta):
 
     def get_signals(self, df: Optional[pd.DataFrame] = None):
         _df = df if df is not None else self.generate_signals()
-        current_candle = _df.iloc[-1, :]
+        # current_candle = _df.iloc[-1, :]
+        current_candle = _df.loc[_df["ShortEntry"] == True].iloc[-1, :]
         signals = [
             [
                 Signal(
                     type_,
+                    current_candle["symbol"],
                     current_candle.name.to_pydatetime().isoformat(),
                     str(current_candle["close"]),
                     current_candle[type_.tag_col],
