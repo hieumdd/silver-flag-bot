@@ -613,6 +613,20 @@ files = [
 ]
 
 [[package]]
+name = "emoji"
+version = "2.10.0"
+description = "Emoji for Python"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+files = [
+    {file = "emoji-2.10.0-py2.py3-none-any.whl", hash = "sha256:aed4332caa23553a7218f032c08b0a325ae53b010f7fb98ad272c0f7841bc1d3"},
+    {file = "emoji-2.10.0.tar.gz", hash = "sha256:7e68435eecd2c428c3b4aaa5f72d61a5b1a36c81a5138681cba13d19d94aa3a0"},
+]
+
+[package.extras]
+dev = ["coverage", "coveralls", "pytest"]
+
+[[package]]
 name = "executing"
 version = "2.0.1"
 description = "Get the currently executing AST node of a frame, and other information"
@@ -2579,4 +2593,4 @@ test = ["websockets"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11"
-content-hash = "1c5833d1bf668172eae7d6535dec6bbbd03222848bb5c67aee25e9d393ad662c"
+content-hash = "49faef5f5f8bead2fac340ad1c9d3c744ea1f5f2233011e8b79c11799a9ce747"
