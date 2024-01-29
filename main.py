@@ -12,9 +12,7 @@ strategy = MultiMA()
 
 
 async def main(context: ContextTypes.DEFAULT_TYPE):
-    signals = strategy.get_signals()
-
-    if signals:
+    if signals := strategy.get_signals():
         for signal in signals:
             await context.bot.send_message(
                 chat_id=CHAT_ID,
