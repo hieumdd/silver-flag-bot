@@ -1,9 +1,13 @@
-from enum import StrEnum
+from dataclasses import dataclass
 
 
-class SignalEnum(StrEnum):
-    LONG_ENTRY = "long_entry"
-    SHORT_ENTRY = "short_entry"
+@dataclass
+class SignalType:
+    flag_col: str
+    tag_col: str
+    message: str
+    emoji_short_code: str
 
-    LONG_EXIT = "long_exit"
-    SHORT_EXIT = "short_exit"
+
+LongEntry = SignalType("LongEntry", "LongEntryTag", "LONG", ":green_circle:")
+ShortEntry = SignalType("ShortEntry", "ShortEntryTag", "SHORT", ":red_circle:")

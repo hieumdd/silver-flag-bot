@@ -1,15 +1,26 @@
+from dataclasses import dataclass
+
 import emoji
 
+from trading.signal.enum import SignalType
+
+
+@dataclass
 class Signal:
-    def __init__(self, message: str):
-        self.message = message
+    type_: SignalType
+    timestamp: str
+    value: str
+    message: str
 
-
-class LongSignal(Signal):
-    def to_message(self):
-        return emoji.emojize(f":green_circle: {self.message}")
-
-
-class ShortSignal(Signal):
-    def to_message(self):
-        return emoji.emojize(f":red_circle: {self.message}")
+    def __repr__(self):
+        return emoji.emojize(
+            " ".join(
+                [
+                    self.type_.emoji_short_code,
+                    self.timestamp,
+                    self.type_.message,
+                    self.value,
+                    self.message,
+                ]
+            )
+        )
