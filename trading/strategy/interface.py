@@ -21,11 +21,12 @@ class Strategy(metaclass=ABCMeta):
 
         ohlc_columns = ["value", "open", "high", "low", "close"]
 
-        df = pd.DataFrame(SSIClient().get_intraday(self.get_options()))
+        df = pd.DataFrame(
+            SSIClient().get_intraday(self.get_options())
+        ).drop_duplicates()
 
         df = (
-            df.drop_duplicates()
-            .set_index(pd.DatetimeIndex(df.apply(create_timestamp, axis=1)))
+            df.set_index(pd.DatetimeIndex(df.apply(create_timestamp, axis=1)))
             .sort_index()
             .rename(str.lower, axis=1)
             .astype({col_name: float for col_name in ohlc_columns})
@@ -42,14 +43,16 @@ class Strategy(metaclass=ABCMeta):
         pass
 
     def generate_indicators(self, df: Optional[pd.DataFrame] = None) -> pd.DataFrame:
-        return self.populate_indicators(df if df else self.get_data())
+        return self.populate_indicators(df if df is not None else self.get_data())
 
     @abstractmethod
     def populate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
         pass
 
     def generate_signals(self, df: Optional[pd.DataFrame] = None) -> pd.DataFrame:
-        return self.populate_signals(df if df else self.generate_indicators())
+        return self.populate_signals(
+            df if df is not None else self.generate_indicators()
+        )
 
     def get_signals(self, df: Optional[pd.DataFrame] = None):
         _df = df if df is not None else self.generate_signals()
