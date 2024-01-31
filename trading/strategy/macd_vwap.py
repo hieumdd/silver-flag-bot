@@ -43,7 +43,7 @@ class MACDVWAP(Strategy):
 
         return _df
 
-    def populate_plot(self, df: DataFrame) -> DataFrame:
+    def populate_subplots(self, df: DataFrame) -> DataFrame:
         _df = df.iloc[-90:].copy()
 
         _df.loc[
@@ -59,7 +59,7 @@ class MACDVWAP(Strategy):
             _df.loc[_df[ShortEntry.flag_col] == True]["low"] - 1
         )
 
-        aps = [
+        return [
             mpf.make_addplot(
                 _df["VWAP"],
                 panel=0,
@@ -121,5 +121,3 @@ class MACDVWAP(Strategy):
                 ]
             ),
         ]
-
-        return partial(mpf.plot, _df, addplot=aps)

@@ -27,20 +27,19 @@ async def polling(context: ContextTypes.DEFAULT_TYPE):
 
     logger.info(f"Strategy {strategy.__class__} analyzed: {len(signals)} signals")
 
+    await context.bot.send_photo(
+        chat_id=chat_id,
+        photo=plot,
+        caption=str(type(strategy).__name__),
+        parse_mode="html",
+    )
+
     for signal in signals:
-        if plot:
-            await context.bot.send_photo(
-                chat_id=chat_id,
-                photo=plot,
-                caption=str(signal),
-                parse_mode="html",
-            )
-        else:
-            await context.bot.send_message(
-                chat_id=chat_id,
-                text=str(signal),
-                parse_mode="html",
-            )
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=str(signal),
+            parse_mode="html",
+        )
 
 
 async def on_chart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -48,12 +47,11 @@ async def on_chart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     plot, _ = strategy.analyze()
 
-    if plot:
-        await update.message.reply_photo(photo=plot, parse_mode="html")
-    else:
-        await update.message.reply_text(
-            f"Strategy {strategy.__class__} does not have plotting function"
-        )
+    await update.message.reply_photo(
+        photo=plot,
+        caption=str(type(strategy).__name__),
+        parse_mode="html",
+    )
 
 
 timezone = ZoneInfo("Asia/Ho_Chi_Minh")
