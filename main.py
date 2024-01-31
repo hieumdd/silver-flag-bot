@@ -1,74 +1,60 @@
-from functools import partial
 import logging
 import os
-from zoneinfo import ZoneInfo
 
-from telegram import Update
-from telegram.ext import Application, CommandHandler, ContextTypes
-from apscheduler.triggers.cron import CronTrigger
+from telegram.ext import Application, CommandHandler
 
 from trading.strategy.macd_vwap import MACDVWAP
+from bot.polling import PollingCronTrigger, polling
+from bot.analyze import on_analyze
 
 logger = logging.getLogger(__name__)
-
 logger.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-ch.setFormatter(formatter)
-logger.addHandler(ch)
-
-chat_id = -4154075164
-strategy = MACDVWAP("VN30F1M")
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(
+    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+)
+logger.addHandler(console_handler)
 
 
-async def polling(context: ContextTypes.DEFAULT_TYPE):
-    logger.info(f"Running strategy {strategy.__class__}")
+if __name__ == "__main__":
+    strategy = MACDVWAP("VN30F1M")
+    chat_id = -4154075164
 
-    analysis, signal = strategy.analyze()
+    async def post_init(application: Application):
+        await application.bot.set_my_commands([("analyze", "Analyze")])
 
-    if signal:
-        await context.bot.send_photo(
-            chat_id=chat_id,
-            photo=analysis.plot,
-            caption=signal.to_html(analysis.symbol),
-            parse_mode="html",
-        )
-
-
-async def on_chart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    logger.info(f"Plotting strategy {strategy.__class__}")
-
-    analysis, _ = strategy.analyze()
-
-    await update.message.reply_photo(
-        photo=analysis.plot,
-        caption=analysis.to_html(),
-        parse_mode="html",
+    application = (
+        Application.builder()
+        .token(os.getenv("TELEGRAM_TOKEN", ""))
+        .post_init(post_init)
+        .build()
     )
 
+    application.job_queue.run_custom(
+        polling,
+        data=strategy,
+        chat_id=chat_id,
+        job_kwargs={"trigger": PollingCronTrigger(hour="9-11")},
+    )
+    application.job_queue.run_custom(
+        polling,
+        data=strategy,
+        chat_id=chat_id,
+        job_kwargs={"trigger": PollingCronTrigger(hour="11", minute="0-30")},
+    )
+    application.job_queue.run_custom(
+        polling,
+        data=strategy,
+        chat_id=chat_id,
+        job_kwargs={"trigger": PollingCronTrigger(hour="13-14")},
+    )
+    application.job_queue.run_custom(
+        polling,
+        data=strategy,
+        chat_id=chat_id,
+        job_kwargs={"trigger": PollingCronTrigger(hour="14", minute="0-30")},
+    )
 
-timezone = ZoneInfo("Asia/Ho_Chi_Minh")
-VN30CronTrigger = partial(CronTrigger, day_of_week="0-4", second="0", timezone=timezone)
+    application.add_handler(CommandHandler("analyze", on_analyze(strategy)))
 
-application = Application.builder().token(os.getenv("TELEGRAM_TOKEN", "")).build()
-
-application.job_queue.run_custom(
-    polling,
-    job_kwargs={"trigger": VN30CronTrigger(hour="9-11")},
-)
-application.job_queue.run_custom(
-    polling,
-    job_kwargs={"trigger": VN30CronTrigger(hour="11", minute="0-30")},
-)
-application.job_queue.run_custom(
-    polling,
-    job_kwargs={"trigger": VN30CronTrigger(hour="13-14")},
-)
-application.job_queue.run_custom(
-    polling,
-    job_kwargs={"trigger": VN30CronTrigger(hour="14", minute="0-30")},
-)
-
-application.add_handler(CommandHandler("chart", on_chart))
-
-application.run_polling()
+    application.run_polling()
