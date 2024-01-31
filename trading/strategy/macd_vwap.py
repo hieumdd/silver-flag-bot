@@ -1,26 +1,12 @@
-from datetime import datetime
-
-import pandas as pd
 import pandas_ta as ta
 
-from ssi.options import GetIntradayOptions
+from data.provider import IntradayDataProvider
 from trading.signal.enum import LongEntry, ShortEntry
 from trading.strategy.interface import Strategy
 
 
 class MACDVWAP(Strategy):
-    _range = range(5, 105, 5)
-
-    def get_options(self):
-        start_date, *_, end_date = pd.bdate_range(
-            end=datetime.today().date(),
-            periods=7,
-        )
-        return GetIntradayOptions(
-            symbol="VN30F1M",
-            start_date=start_date.to_pydatetime(),
-            end_date=end_date.to_pydatetime(),
-        )
+    data_provider = IntradayDataProvider()
 
     def populate_indicators(self, df):
         _df = df.copy()

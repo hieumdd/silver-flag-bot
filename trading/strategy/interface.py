@@ -1,42 +1,25 @@
 from abc import ABCMeta, abstractmethod
-from datetime import datetime
 from itertools import chain
 from typing import Optional
 
 import pandas as pd
 
-from ssi.options import GetIntradayOptions
-from ssi.client import SSIClient
+from data.provider import DataProvider
 from trading.signal.enum import LongEntry, ShortEntry
 from trading.signal.model import Signal
 
 
 class Strategy(metaclass=ABCMeta):
-    def get_data(self):
-        def create_timestamp(row):
-            return datetime.combine(
-                datetime.strptime(row["TradingDate"], "%d/%m/%Y").date(),
-                datetime.strptime(row["Time"], "%H:%M:%S").time(),
-            )
+    def __init__(self, symbol: str):
+        self.symbol = symbol
 
-        ohlc_columns = ["value", "open", "high", "low", "close", "volume"]
-
-        df = pd.DataFrame(
-            SSIClient().get_intraday(self.get_options())
-        ).drop_duplicates()
-
-        df = (
-            df.set_index(pd.DatetimeIndex(df.apply(create_timestamp, axis=1)))
-            .sort_index()
-            .rename(str.lower, axis=1)
-            .astype({col_name: float for col_name in ohlc_columns})
-        )
-
-        return df[["symbol", *ohlc_columns]]
-
+    @property
     @abstractmethod
-    def get_options(self) -> GetIntradayOptions:
+    def data_provider(cls) -> DataProvider:
         pass
+
+    def get_data(self):
+        return self.data_provider.get(self.symbol)
 
     @abstractmethod
     def populate_indicators(self, df: pd.DataFrame) -> pd.DataFrame:

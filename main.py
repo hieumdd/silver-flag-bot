@@ -16,7 +16,7 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 chat_id = -4154075164
-strategy = MultiMA()
+strategy = MultiMA("VN30F1M")
 
 
 async def main(context: ContextTypes.DEFAULT_TYPE):
