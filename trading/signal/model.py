@@ -1,25 +1,39 @@
 from dataclasses import dataclass
+import io
 
 import emoji
 
-from trading.signal.enum import SignalType
+
+@dataclass
+class SignalType:
+    flag_col: str
+    message: str
+    emoji_short_code: str
+
+
+LongEntry = SignalType("LongEntry", "LONG", ":green_circle:")
+ShortEntry = SignalType("ShortEntry", "SHORT", ":red_circle:")
 
 
 @dataclass
 class Signal:
     type_: SignalType
+    value: str
+
+    def to_html(self, symbol: str):
+        return emoji.emojize(
+            f"{self.type_.emoji_short_code} {symbol} @ <code>{self.value}</code> {self.type_.message}"
+        )
+
+
+@dataclass
+class Analysis:
+    strategy: str
     symbol: str
     timestamp: str
-    value: str
-    message: str
+    plot: io.BytesIO
 
-    def __str__(self):
+    def to_html(self):
         return emoji.emojize(
-            "\n".join(
-                [
-                    f"{self.type_.emoji_short_code} {self.symbol} @ <b><code>{self.value}</code></b> {self.type_.message}",
-                    f"<tg-spoiler><b>Message</b>: {self.message}</tg-spoiler>",
-                    f"<tg-spoiler><b>Timestamp</b>: {self.timestamp}</tg-spoiler>",
-                ]
-            )
+            f":blue_circle: {self.strategy} :: {self.symbol} @ {self.timestamp}"
         )
