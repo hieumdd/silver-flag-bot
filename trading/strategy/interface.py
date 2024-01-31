@@ -7,8 +7,7 @@ import pandas as pd
 import mplfinance as mpf
 
 from data.provider import DataProvider
-from trading.signal.enum import LongEntry, ShortEntry
-from trading.signal.model import Signal
+from trading.signal.model import Signal, LongEntry, ShortEntry
 
 
 class Strategy(metaclass=ABCMeta):
@@ -74,16 +73,15 @@ class Strategy(metaclass=ABCMeta):
                 *[
                     [
                         Signal(
-                            type_,
+                            signal_type,
                             current_candle["symbol"],
                             current_candle.name.to_pydatetime().isoformat(),
                             str(current_candle["close"]),
-                            current_candle[type_.tag_col],
                         )
                     ]
-                    if current_candle[type_.flag_col] == True
+                    if current_candle[signal_type.flag_col] == True
                     else []
-                    for type_ in [LongEntry, ShortEntry]
+                    for signal_type in [LongEntry, ShortEntry]
                 ]
             )
         )

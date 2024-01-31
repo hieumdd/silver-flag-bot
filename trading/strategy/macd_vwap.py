@@ -5,7 +5,7 @@ import pandas_ta as ta
 import mplfinance as mpf
 
 from data.provider import IntradayDataProvider
-from trading.signal.enum import LongEntry, ShortEntry
+from trading.signal.model import LongEntry, ShortEntry
 from trading.strategy.interface import Strategy
 
 
@@ -24,22 +24,19 @@ class MACDVWAP(Strategy):
     def populate_signals(self, df):
         _df = df.copy()
 
-        for signal_type in [LongEntry, ShortEntry]:
-            _df[[signal_type.flag_col, signal_type.tag_col]] = (None, None)
-
         _df.loc[
             (ta.cross(_df["MACD"], _df["MACD_S"]) == 1)
             & (_df["close"] > _df["VWAP"])
             & (_df["ADX"] > 25),
-            [LongEntry.flag_col, LongEntry.tag_col],
-        ] = (True, "MACD Cross Up & Close > VWAP")
+            LongEntry.flag_col,
+        ] = True
 
         _df.loc[
             (ta.cross(_df["MACD"], _df["MACD_S"], above=False) == 1)
             & (_df["close"] < _df["VWAP"])
             & (_df["ADX"] > 25),
-            [ShortEntry.flag_col, ShortEntry.tag_col],
-        ] = (True, "MACD Cross Down & Close < VWAP")
+            ShortEntry.flag_col,
+        ] = True
 
         return _df
 
