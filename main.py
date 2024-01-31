@@ -1,9 +1,10 @@
+from functools import partial
 import logging
 import os
-from datetime import time
 from zoneinfo import ZoneInfo
 
 from telegram.ext import Application, ContextTypes
+from apscheduler.triggers.cron import CronTrigger
 
 from trading.strategy.multi_ma import MultiMA
 
@@ -14,7 +15,6 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-timezone = ZoneInfo("Asia/Ho_Chi_Minh")
 chat_id = -4154075164
 strategy = MultiMA()
 
@@ -32,17 +32,26 @@ async def main(context: ContextTypes.DEFAULT_TYPE):
             )
 
 
+timezone = ZoneInfo("Asia/Ho_Chi_Minh")
+VN30CronTrigger = partial(CronTrigger, day_of_week="0-4", second="0", timezone=timezone)
+
 application = Application.builder().token(os.getenv("TELEGRAM_TOKEN", "")).build()
-application.job_queue.run_repeating(
+
+application.job_queue.run_custom(
     main,
-    interval=60,
-    first=time(9, tzinfo=timezone),
-    last=time(11, 30, tzinfo=timezone),
+    job_kwargs={"trigger": VN30CronTrigger(hour="9-11")},
 )
-application.job_queue.run_repeating(
+application.job_queue.run_custom(
     main,
-    interval=60,
-    first=time(13, tzinfo=timezone),
-    last=time(14, 30, tzinfo=timezone),
+    job_kwargs={"trigger": VN30CronTrigger(hour="11", minute="0-30")},
 )
+application.job_queue.run_custom(
+    main,
+    job_kwargs={"trigger": VN30CronTrigger(hour="13-14")},
+)
+application.job_queue.run_custom(
+    main,
+    job_kwargs={"trigger": VN30CronTrigger(hour="14", minute="0-30")},
+)
+
 application.run_polling()
