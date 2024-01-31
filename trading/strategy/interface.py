@@ -65,7 +65,6 @@ class Strategy(metaclass=ABCMeta):
         _df = df if df is not None else self.generate_signals()
 
         latest_candle = _df.iloc[-1, :]
-        latest_candle = _df.iloc[-15, :]
 
         def _parse_signal() -> Optional[Signal]:
             long_entry = latest_candle[LongEntry.flag_col] == True
