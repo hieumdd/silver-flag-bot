@@ -19,7 +19,7 @@ class Strategy(metaclass=ABCMeta):
                 datetime.strptime(row["Time"], "%H:%M:%S").time(),
             )
 
-        ohlc_columns = ["value", "open", "high", "low", "close"]
+        ohlc_columns = ["value", "open", "high", "low", "close", "volume"]
 
         df = pd.DataFrame(
             SSIClient().get_intraday(self.get_options())
