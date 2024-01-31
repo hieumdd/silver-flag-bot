@@ -82,7 +82,7 @@ class Strategy(metaclass=ABCMeta):
             Analysis(
                 strategy=str(type(self).__name__),
                 symbol=self.symbol,
-                timestamp=latest_candle.index.name,
+                timestamp=latest_candle.name.to_pydatetime().isoformat(),
                 plot=self.generate_plot(_df),
             ),
             _parse_signal(),
