@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+import io
 from itertools import chain
 from typing import Optional
 
@@ -55,3 +56,24 @@ class Strategy(metaclass=ABCMeta):
             for type_ in [LongEntry, ShortEntry]
         ]
         return list(chain(*signals))
+
+    def populate_plot(self, df: pd.DataFrame) -> Optional[io.BytesIO]:
+        return None
+
+    def generate_plot(self, df: Optional[pd.DataFrame] = None) -> Optional[io.BytesIO]:
+        plotter = self.populate_plot(df if df is not None else self.generate_signals())
+
+        if plotter is None:
+            return None
+        
+        buffer = io.BytesIO()
+        plotter(
+            type="candle",
+            tight_layout=True,
+            volume=True,
+            figratio=(16, 10),
+            style="charles",
+            savefig=buffer,
+        )
+        buffer.seek(0)
+        return buffer
