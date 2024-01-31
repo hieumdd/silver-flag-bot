@@ -1,42 +1,25 @@
 from abc import ABCMeta, abstractmethod
-from datetime import datetime
-from itertools import chain
+import io
 from typing import Optional
 
 import pandas as pd
+import mplfinance as mpf
 
-from ssi.options import GetIntradayOptions
-from ssi.client import SSIClient
-from trading.signal.enum import LongEntry, ShortEntry
-from trading.signal.model import Signal
+from data.provider import DataProvider
+from trading.signal.model import Analysis, Signal, LongEntry, ShortEntry
 
 
 class Strategy(metaclass=ABCMeta):
-    def get_data(self):
-        def create_timestamp(row):
-            return datetime.combine(
-                datetime.strptime(row["TradingDate"], "%d/%m/%Y").date(),
-                datetime.strptime(row["Time"], "%H:%M:%S").time(),
-            )
+    def __init__(self, symbol: str):
+        self.symbol = symbol
 
-        ohlc_columns = ["value", "open", "high", "low", "close"]
-
-        df = pd.DataFrame(
-            SSIClient().get_intraday(self.get_options())
-        ).drop_duplicates()
-
-        df = (
-            df.set_index(pd.DatetimeIndex(df.apply(create_timestamp, axis=1)))
-            .sort_index()
-            .rename(str.lower, axis=1)
-            .astype({col_name: float for col_name in ohlc_columns})
-        )
-
-        return df[["symbol", *ohlc_columns]]
-
+    @property
     @abstractmethod
-    def get_options(self) -> GetIntradayOptions:
+    def data_provider(cls) -> DataProvider:
         pass
+
+    def get_data(self):
+        return self.data_provider.get(self.symbol)
 
     @abstractmethod
     def populate_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -54,21 +37,53 @@ class Strategy(metaclass=ABCMeta):
             df if df is not None else self.generate_indicators()
         )
 
-    def get_signals(self, df: Optional[pd.DataFrame] = None):
+    def populate_subplots(self, df: pd.DataFrame) -> list[dict]:
+        return []
+
+    def generate_plot(self, df: Optional[pd.DataFrame] = None) -> io.BytesIO:
+        _df = (df if df is not None else self.generate_signals()).iloc[-90:]
+
+        buffer = io.BytesIO()
+        mpf.plot(
+            _df,
+            type="candle",
+            tight_layout=True,
+            volume=True,
+            figratio=(16, 10),
+            style="tradingview",
+            addplot=self.populate_subplots(_df),
+            savefig=buffer,
+        )
+        buffer.seek(0)
+
+        return buffer
+
+    def analyze(
+        self,
+        df: Optional[pd.DataFrame] = None,
+    ) -> tuple[Analysis, Optional[Signal]]:
         _df = df if df is not None else self.generate_signals()
-        current_candle = _df.iloc[-1, :]
-        signals = [
-            [
-                Signal(
-                    type_,
-                    current_candle["symbol"],
-                    current_candle.name.to_pydatetime().isoformat(),
-                    str(current_candle["close"]),
-                    current_candle[type_.tag_col],
-                )
-            ]
-            if current_candle[type_.flag_col] == True
-            else []
-            for type_ in [LongEntry, ShortEntry]
-        ]
-        return list(chain(*signals))
+
+        latest_candle = _df.iloc[-1, :]
+
+        def _parse_signal() -> Optional[Signal]:
+            long_entry = latest_candle[LongEntry.flag_col] == True
+            short_entry = latest_candle[ShortEntry.flag_col] == True
+
+            if long_entry and not short_entry:
+                return Signal(LongEntry, str(latest_candle["close"]))
+
+            if short_entry and not long_entry:
+                return Signal(ShortEntry, str(latest_candle["close"]))
+
+            return None
+
+        return (
+            Analysis(
+                strategy=str(type(self).__name__),
+                symbol=self.symbol,
+                timestamp=latest_candle.name.to_pydatetime().isoformat(),
+                plot=self.generate_plot(_df),
+            ),
+            _parse_signal(),
+        )

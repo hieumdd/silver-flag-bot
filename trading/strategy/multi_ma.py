@@ -1,28 +1,16 @@
-from datetime import datetime
 from functools import reduce
 import operator
 
-import pandas as pd
 import pandas_ta as ta
 
-from ssi.options import GetIntradayOptions
-from trading.signal.enum import LongEntry, ShortEntry
+from data.provider import IntradayDataProvider
+from trading.signal.model import LongEntry, ShortEntry
 from trading.strategy.interface import Strategy
 
 
 class MultiMA(Strategy):
+    data_provider = IntradayDataProvider()
     _range = range(5, 105, 5)
-
-    def get_options(self):
-        start_date, *_, end_date = pd.bdate_range(
-            end=datetime.today().date(),
-            periods=7,
-        )
-        return GetIntradayOptions(
-            symbol="VN30F1M",
-            start_date=start_date.to_pydatetime(),
-            end_date=end_date.to_pydatetime(),
-        )
 
     def populate_indicators(self, df):
         _df = df.copy()
@@ -37,9 +25,6 @@ class MultiMA(Strategy):
     def populate_signals(self, df):
         _df = df.copy()
 
-        for signal_type in [LongEntry, ShortEntry]:
-            _df[[signal_type.flag_col, signal_type.tag_col]] = (None, None)
-
         _df.loc[
             reduce(
                 operator.and_,
@@ -49,8 +34,8 @@ class MultiMA(Strategy):
                 ]
                 + [_df["RSI_CROSS_ABOVE"] == 1],
             ),
-            [LongEntry.flag_col, LongEntry.tag_col],
-        ] = (True, "EMAs & RSI")
+            LongEntry.flag_col,
+        ] = True
 
         _df.loc[
             reduce(
@@ -61,7 +46,7 @@ class MultiMA(Strategy):
                 ]
                 + [_df["RSI_CROSS_BELOW"] == 1],
             ),
-            [ShortEntry.flag_col, ShortEntry.tag_col],
-        ] = (True, "EMAs & RSI")
+            ShortEntry.flag_col,
+        ] = True
 
         return _df

@@ -81,7 +81,7 @@ class SSIClient:
                         "PageIndex": page_index,
                         "PageSize": page_size,
                         "resolution": options.resolution,
-                        "ascending": options.ascending,
+                        "ascending": True,
                     },
                 )
                 .json()
