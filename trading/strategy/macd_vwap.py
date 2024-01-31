@@ -1,5 +1,3 @@
-from functools import partial
-
 from pandas.core.frame import DataFrame
 import pandas_ta as ta
 import mplfinance as mpf
