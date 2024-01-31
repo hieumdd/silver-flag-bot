@@ -4,6 +4,7 @@ from itertools import chain
 from typing import Optional
 
 import pandas as pd
+import mplfinance as mpf
 
 from data.provider import DataProvider
 from trading.signal.enum import LongEntry, ShortEntry
@@ -38,31 +39,31 @@ class Strategy(metaclass=ABCMeta):
             df if df is not None else self.generate_indicators()
         )
 
-    def populate_plot(self, df: pd.DataFrame) -> Optional[io.BytesIO]:
-        return None
+    def populate_subplots(self, df: pd.DataFrame) -> list[dict]:
+        return []
 
-    def generate_plot(self, df: Optional[pd.DataFrame] = None) -> Optional[io.BytesIO]:
-        plotter = self.populate_plot(df if df is not None else self.generate_signals())
-
-        if plotter is None:
-            return None
+    def generate_plot(self, df: Optional[pd.DataFrame] = None) -> io.BytesIO:
+        _df = (df if df is not None else self.generate_signals()).iloc[-90:]
 
         buffer = io.BytesIO()
-        plotter(
+        mpf.plot(
+            _df,
             type="candle",
             tight_layout=True,
             volume=True,
             figratio=(16, 10),
             style="charles",
+            addplot=self.populate_subplots(_df),
             savefig=buffer,
         )
         buffer.seek(0)
+
         return buffer
 
     def analyze(
         self,
         df: Optional[pd.DataFrame] = None,
-    ) -> tuple[Optional[io.BytesIO], list[Signal]]:
+    ) -> tuple[io.BytesIO, list[Signal]]:
         _df = df if df is not None else self.generate_signals()
 
         plot = self.generate_plot(_df)
