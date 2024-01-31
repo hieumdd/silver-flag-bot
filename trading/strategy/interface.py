@@ -50,7 +50,7 @@ class Strategy(metaclass=ABCMeta):
             tight_layout=True,
             volume=True,
             figratio=(16, 10),
-            style="charles",
+            style="tradingview",
             addplot=self.populate_subplots(_df),
             savefig=buffer,
         )
