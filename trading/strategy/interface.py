@@ -1,13 +1,12 @@
 from abc import ABCMeta, abstractmethod
 import io
-from itertools import chain
 from typing import Optional
 
 import pandas as pd
 import mplfinance as mpf
 
 from data.provider import DataProvider
-from trading.signal.model import Signal, LongEntry, ShortEntry
+from trading.signal.model import Analysis, Signal, LongEntry, ShortEntry
 
 
 class Strategy(metaclass=ABCMeta):
@@ -62,28 +61,30 @@ class Strategy(metaclass=ABCMeta):
     def analyze(
         self,
         df: Optional[pd.DataFrame] = None,
-    ) -> tuple[io.BytesIO, list[Signal]]:
+    ) -> tuple[Analysis, Optional[Signal]]:
         _df = df if df is not None else self.generate_signals()
 
-        plot = self.generate_plot(_df)
+        latest_candle = _df.iloc[-1, :]
+        latest_candle = _df.iloc[-15, :]
 
-        current_candle = _df.iloc[-1, :]
-        signals = list(
-            chain(
-                *[
-                    [
-                        Signal(
-                            signal_type,
-                            current_candle["symbol"],
-                            current_candle.name.to_pydatetime().isoformat(),
-                            str(current_candle["close"]),
-                        )
-                    ]
-                    if current_candle[signal_type.flag_col] == True
-                    else []
-                    for signal_type in [LongEntry, ShortEntry]
-                ]
-            )
+        def _parse_signal() -> Optional[Signal]:
+            long_entry = latest_candle[LongEntry.flag_col] == True
+            short_entry = latest_candle[ShortEntry.flag_col] == True
+
+            if long_entry and not short_entry:
+                return Signal(LongEntry, str(latest_candle["close"]))
+
+            if short_entry and not long_entry:
+                return Signal(ShortEntry, str(latest_candle["close"]))
+
+            return None
+
+        return (
+            Analysis(
+                strategy=str(type(self).__name__),
+                symbol=self.symbol,
+                timestamp=latest_candle.index.name,
+                plot=self.generate_plot(_df),
+            ),
+            _parse_signal(),
         )
-
-        return (plot, signals)

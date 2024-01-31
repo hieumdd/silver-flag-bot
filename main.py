@@ -10,6 +10,7 @@ from apscheduler.triggers.cron import CronTrigger
 from trading.strategy.macd_vwap import MACDVWAP
 
 logger = logging.getLogger(__name__)
+
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -23,21 +24,13 @@ strategy = MACDVWAP("VN30F1M")
 async def polling(context: ContextTypes.DEFAULT_TYPE):
     logger.info(f"Running strategy {strategy.__class__}")
 
-    plot, signals = strategy.analyze()
+    analysis, signal = strategy.analyze()
 
-    logger.info(f"Strategy {strategy.__class__} analyzed: {len(signals)} signals")
-
-    await context.bot.send_photo(
-        chat_id=chat_id,
-        photo=plot,
-        caption=str(type(strategy).__name__),
-        parse_mode="html",
-    )
-
-    for signal in signals:
-        await context.bot.send_message(
+    if signal:
+        await context.bot.send_photo(
             chat_id=chat_id,
-            text=str(signal),
+            photo=analysis.plot,
+            caption=signal.to_html(analysis.symbol),
             parse_mode="html",
         )
 
@@ -45,11 +38,11 @@ async def polling(context: ContextTypes.DEFAULT_TYPE):
 async def on_chart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     logger.info(f"Plotting strategy {strategy.__class__}")
 
-    plot, _ = strategy.analyze()
+    analysis, _ = strategy.analyze()
 
     await update.message.reply_photo(
-        photo=plot,
-        caption=str(type(strategy).__name__),
+        photo=analysis.plot,
+        caption=analysis.to_html(),
         parse_mode="html",
     )
 
