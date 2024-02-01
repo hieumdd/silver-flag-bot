@@ -39,7 +39,7 @@ class MACDVWAP(Strategy):
         return _df
 
     def populate_subplots(self, df: DataFrame) -> DataFrame:
-        _df = df.iloc[-90:].copy()
+        _df = df.copy()
 
         _df.loc[
             _df[LongEntry.flag_col] == True,
