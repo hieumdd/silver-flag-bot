@@ -1,11 +1,12 @@
 from functools import partial
-import logging
 from zoneinfo import ZoneInfo
 
 from telegram.ext import ContextTypes
 from apscheduler.triggers.cron import CronTrigger
 
-logger = logging.getLogger(__name__)
+from logger import get_logger
+
+logger = get_logger(__name__)
 
 
 async def polling(context: ContextTypes.DEFAULT_TYPE):

@@ -7,14 +7,10 @@ from trading.strategy.macd_vwap import MACDVWAP
 from bot.polling import PollingCronTrigger, polling
 from bot.analyze import on_analyze
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(
-    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    format="%(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()],
 )
-logger.addHandler(console_handler)
-
 
 if __name__ == "__main__":
     strategy = MACDVWAP("VN30F1M")

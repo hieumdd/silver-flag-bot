@@ -1,12 +1,11 @@
-import logging
-
 from telegram import Update
 from telegram.ext import ContextTypes
 
+from logger import get_logger
 from trading.strategy.interface import Strategy
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def on_analyze(strategy: Strategy):
