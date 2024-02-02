@@ -10,7 +10,7 @@ logger = get_logger(__name__)
 
 def on_analyze(strategy: Strategy):
     async def _on_analyze(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        logger.info(f"Plotting strategy {strategy.__class__}")
+        logger.info(f"Analyzing strategy {strategy.__class__}")
 
         analysis, _ = strategy.analyze()
 
