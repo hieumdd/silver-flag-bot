@@ -1,20 +1,13 @@
-import logging
 import os
 
 from telegram.ext import Application, CommandHandler
 
+from logger import init_logger
 from trading.strategy.macd_vwap import MACDVWAP
 from bot.polling import PollingCronTrigger, polling
 from bot.analyze import on_analyze
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(
-    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-)
-logger.addHandler(console_handler)
-
+init_logger()
 
 if __name__ == "__main__":
     strategy = MACDVWAP("VN30F1M")
