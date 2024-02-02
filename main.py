@@ -1,21 +1,13 @@
-import logging
 import os
 
 from telegram.ext import Application, CommandHandler
-from pythonjsonlogger.jsonlogger import JsonFormatter
 
+from logger import init_logger
 from trading.strategy.macd_vwap import MACDVWAP
 from bot.polling import PollingCronTrigger, polling
 from bot.analyze import on_analyze
 
-logging.basicConfig(handlers=[logging.StreamHandler()])
-for handler in logging.root.handlers:
-    handler.setFormatter(
-        JsonFormatter(
-            "%(name)s - %(levelname)s - %(message)s",
-            rename_fields={"levelname": "severity", "name": "module"},
-        )
-    )
+init_logger()
 
 if __name__ == "__main__":
     strategy = MACDVWAP("VN30F1M")
