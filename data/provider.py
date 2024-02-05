@@ -7,7 +7,7 @@ from ssi.options import GetIntradayOptions
 
 
 class DataProvider(Protocol):
-    def get(self) -> pd.DataFrame:
+    def get(self, *args, **kwargs) -> pd.DataFrame:
         pass
 
 

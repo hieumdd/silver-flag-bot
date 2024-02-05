@@ -67,8 +67,8 @@ class Strategy(metaclass=ABCMeta):
         latest_candle = _df.iloc[-1, :]
 
         def _parse_signal() -> Optional[Signal]:
-            long_entry = latest_candle[LongEntry.flag_col] == True
-            short_entry = latest_candle[ShortEntry.flag_col] == True
+            long_entry = latest_candle[LongEntry.flag_col] is True
+            short_entry = latest_candle[ShortEntry.flag_col] is True
 
             if long_entry and not short_entry:
                 return Signal(LongEntry, str(latest_candle["close"]))
@@ -82,7 +82,7 @@ class Strategy(metaclass=ABCMeta):
             Analysis(
                 strategy=str(type(self).__name__),
                 symbol=self.symbol,
-                timestamp=latest_candle.name.to_pydatetime().isoformat(),
+                timestamp=latest_candle.name.to_pydatetime().isoformat(),  # type: ignore[attr-defined]
                 plot=self.generate_plot(_df),
             ),
             _parse_signal(),
