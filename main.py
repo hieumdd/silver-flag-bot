@@ -23,30 +23,18 @@ if __name__ == "__main__":
         .build()
     )
 
-    application.job_queue.run_custom(
-        polling,
-        data=strategy,
-        chat_id=chat_id,
-        job_kwargs={"trigger": PollingCronTrigger(hour="9-11")},
-    )
-    application.job_queue.run_custom(
-        polling,
-        data=strategy,
-        chat_id=chat_id,
-        job_kwargs={"trigger": PollingCronTrigger(hour="11", minute="0-30")},
-    )
-    application.job_queue.run_custom(
-        polling,
-        data=strategy,
-        chat_id=chat_id,
-        job_kwargs={"trigger": PollingCronTrigger(hour="13-14")},
-    )
-    application.job_queue.run_custom(
-        polling,
-        data=strategy,
-        chat_id=chat_id,
-        job_kwargs={"trigger": PollingCronTrigger(hour="14", minute="0-30")},
-    )
+    for trigger in [
+        PollingCronTrigger(hour="9-11"),
+        PollingCronTrigger(hour="11", minute="0-30"),
+        PollingCronTrigger(hour="13-14"),
+        PollingCronTrigger(hour="14", minute="0-30"),
+    ]:
+        application.job_queue.run_custom(
+            polling,
+            data=strategy,
+            chat_id=chat_id,
+            job_kwargs={"trigger": trigger},
+        )
 
     application.add_handler(CommandHandler("analyze", on_analyze(strategy)))
 
