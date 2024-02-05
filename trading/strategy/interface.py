@@ -5,8 +5,12 @@ from typing import Optional
 import pandas as pd
 import mplfinance as mpf
 
+from logger import get_logger
 from data.provider import DataProvider
 from trading.signal.model import Analysis, Signal, LongEntry, ShortEntry
+
+
+logger = get_logger(__name__)
 
 
 class Strategy(metaclass=ABCMeta):
@@ -70,10 +74,11 @@ class Strategy(metaclass=ABCMeta):
         _df = df if df is not None else self.generate_signals()
 
         latest_candle = _df.iloc[-1, :]
+        logger.debug("Latest candle", extra={"latest_candle": latest_candle.to_dict()})
 
         def _parse_signal() -> Optional[Signal]:
-            long_entry = latest_candle[LongEntry.flag_col] is True
-            short_entry = latest_candle[ShortEntry.flag_col] is True
+            long_entry = latest_candle[LongEntry.flag_col] == True
+            short_entry = latest_candle[ShortEntry.flag_col] == True
 
             if long_entry and not short_entry:
                 return Signal(LongEntry, str(latest_candle["close"]))
