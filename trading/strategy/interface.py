@@ -40,8 +40,12 @@ class Strategy(metaclass=ABCMeta):
     def populate_subplots(self, df: pd.DataFrame) -> list[dict]:
         return []
 
-    def generate_plot(self, df: Optional[pd.DataFrame] = None) -> io.BytesIO:
-        _df = (df if df is not None else self.generate_signals()).iloc[-90:]
+    def generate_plot(
+        self,
+        df: Optional[pd.DataFrame] = None,
+        candles: Optional[int] = 90,
+    ) -> io.BytesIO:
+        _df = (df if df is not None else self.generate_signals()).iloc[-candles:]
 
         buffer = io.BytesIO()
         mpf.plot(
@@ -61,6 +65,7 @@ class Strategy(metaclass=ABCMeta):
     def analyze(
         self,
         df: Optional[pd.DataFrame] = None,
+        candles: Optional[int] = 90,
     ) -> tuple[Analysis, Optional[Signal]]:
         _df = df if df is not None else self.generate_signals()
 
@@ -82,8 +87,8 @@ class Strategy(metaclass=ABCMeta):
             Analysis(
                 strategy=str(type(self).__name__),
                 symbol=self.symbol,
-                timestamp=latest_candle.name.to_pydatetime().isoformat(),  # type: ignore[attr-defined]
-                plot=self.generate_plot(_df),
+                timestamp=latest_candle.name.to_pydatetime().isoformat(),
+                plot=self.generate_plot(_df, candles),
             ),
             _parse_signal(),
         )
