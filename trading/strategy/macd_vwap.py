@@ -41,18 +41,10 @@ class MACDVWAP(Strategy):
     def populate_subplots(self, df: DataFrame):
         _df = df.copy()
 
-        _df.loc[
-            _df[LongEntry.flag_col] == True,
-            "LongMarker",
-        ] = _df.loc[
-            _df[LongEntry.flag_col] == True
-        ]["high"]
-        _df.loc[
-            _df[ShortEntry.flag_col] == True,
-            "ShortMarker",
-        ] = _df.loc[
-            _df[ShortEntry.flag_col] == True
-        ]["low"]
+        long_marker = _df[LongEntry.flag_col] == True
+        short_marker = _df[ShortEntry.flag_col] == True
+        _df.loc[long_marker, "LongMarker"] = _df.loc[long_marker]["high"]
+        _df.loc[short_marker, "ShortMarker"] = _df.loc[short_marker]["low"]
 
         return [
             mpf.make_addplot(
