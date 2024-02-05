@@ -1,4 +1,3 @@
-from pandas.core.frame import DataFrame
 import pandas_ta as ta
 import mplfinance as mpf
 
@@ -40,7 +39,7 @@ class MACDVWAP(Strategy):
 
         return _df
 
-    def populate_subplots(self, df: DataFrame):
+    def populate_subplots(self, df):
         _df = df.copy()
 
         long_marker = _df[LongEntry.flag_col] == True
