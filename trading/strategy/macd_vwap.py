@@ -42,16 +42,16 @@ class MACDVWAP(Strategy):
         _df = df.copy()
 
         _df.loc[
-            _df[LongEntry.flag_col] is True,
+            _df[LongEntry.flag_col] == True,
             "LongMarker",
         ] = _df.loc[
-            _df[LongEntry.flag_col] is True
+            _df[LongEntry.flag_col] == True
         ]["high"]
         _df.loc[
-            _df[ShortEntry.flag_col] is True,
+            _df[ShortEntry.flag_col] == True,
             "ShortMarker",
         ] = _df.loc[
-            _df[ShortEntry.flag_col] is True
+            _df[ShortEntry.flag_col] == True
         ]["low"]
 
         return [
