@@ -10,6 +10,8 @@ from trading.strategy.interface import Strategy
 class MACDVWAP(Strategy):
     data_provider = IntradayDataProvider()
 
+    adx_threshold = 25
+
     def populate_indicators(self, df):
         _df = df.copy()
 
@@ -25,14 +27,14 @@ class MACDVWAP(Strategy):
         _df.loc[
             (ta.cross(_df["MACD"], _df["MACD_S"]) == 1)
             & (_df["close"] > _df["VWAP"])
-            & (_df["ADX"] > 25),
+            & (_df["ADX"] > self.adx_threshold),
             LongEntry.flag_col,
         ] = True
 
         _df.loc[
             (ta.cross(_df["MACD"], _df["MACD_S"], above=False) == 1)
             & (_df["close"] < _df["VWAP"])
-            & (_df["ADX"] > 25),
+            & (_df["ADX"] > self.adx_threshold),
             ShortEntry.flag_col,
         ] = True
 
@@ -73,7 +75,7 @@ class MACDVWAP(Strategy):
                 secondary_y=False,
             ),
             mpf.make_addplot(
-                _df["ADX"].apply(lambda _: 25),
+                _df["ADX"].apply(lambda _: self.adx_threshold),
                 panel=3,
                 width=1,
                 linestyle="--",
