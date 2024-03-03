@@ -7,7 +7,7 @@ from ssi.options import GetIntradayOptions
 
 
 class DataProvider(Protocol):
-    def get(self) -> pd.DataFrame:
+    def get(self, *args, **kwargs) -> pd.DataFrame:
         pass
 
 
@@ -26,12 +26,13 @@ class IntradayDataProvider(DataProvider):
             )
 
         ohlc_columns = ["value", "open", "high", "low", "close", "volume"]
+        df["timestamp"] = pd.DatetimeIndex(df.apply(create_timestamp, axis=1))
 
         df = (
-            df.set_index(pd.DatetimeIndex(df.apply(create_timestamp, axis=1)))
+            df.set_index(df["timestamp"], drop=False)
             .sort_index()
             .rename(str.lower, axis=1)
             .astype({col_name: float for col_name in ohlc_columns})
         )
 
-        return df[["symbol", *ohlc_columns]]
+        return df[["symbol", "timestamp", *ohlc_columns]]

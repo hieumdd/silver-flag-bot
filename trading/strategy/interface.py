@@ -5,8 +5,12 @@ from typing import Optional
 import pandas as pd
 import mplfinance as mpf
 
+from logger import get_logger
 from data.provider import DataProvider
 from trading.signal.model import Analysis, Signal, LongEntry, ShortEntry
+
+
+logger = get_logger(__name__)
 
 
 class Strategy(metaclass=ABCMeta):
@@ -40,8 +44,12 @@ class Strategy(metaclass=ABCMeta):
     def populate_subplots(self, df: pd.DataFrame) -> list[dict]:
         return []
 
-    def generate_plot(self, df: Optional[pd.DataFrame] = None) -> io.BytesIO:
-        _df = (df if df is not None else self.generate_signals()).iloc[-90:]
+    def generate_plot(
+        self,
+        df: Optional[pd.DataFrame] = None,
+        candles: Optional[int] = 90,
+    ) -> io.BytesIO:
+        _df = (df if df is not None else self.generate_signals()).iloc[-candles:]
 
         buffer = io.BytesIO()
         mpf.plot(
@@ -61,10 +69,12 @@ class Strategy(metaclass=ABCMeta):
     def analyze(
         self,
         df: Optional[pd.DataFrame] = None,
+        candles: Optional[int] = 90,
     ) -> tuple[Analysis, Optional[Signal]]:
         _df = df if df is not None else self.generate_signals()
 
         latest_candle = _df.iloc[-1, :]
+        logger.debug("Latest candle", extra={"latest_candle": latest_candle.to_dict()})
 
         def _parse_signal() -> Optional[Signal]:
             long_entry = latest_candle[LongEntry.flag_col] == True
@@ -83,7 +93,7 @@ class Strategy(metaclass=ABCMeta):
                 strategy=str(type(self).__name__),
                 symbol=self.symbol,
                 timestamp=latest_candle.name.to_pydatetime().isoformat(),
-                plot=self.generate_plot(_df),
+                plot=self.generate_plot(_df, candles),
             ),
             _parse_signal(),
         )

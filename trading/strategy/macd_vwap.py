@@ -1,4 +1,3 @@
-from pandas.core.frame import DataFrame
 import pandas_ta as ta
 import mplfinance as mpf
 
@@ -9,6 +8,8 @@ from trading.strategy.interface import Strategy
 
 class MACDVWAP(Strategy):
     data_provider = IntradayDataProvider()
+
+    adx_threshold = 25
 
     def populate_indicators(self, df):
         _df = df.copy()
@@ -25,34 +26,26 @@ class MACDVWAP(Strategy):
         _df.loc[
             (ta.cross(_df["MACD"], _df["MACD_S"]) == 1)
             & (_df["close"] > _df["VWAP"])
-            & (_df["ADX"] > 25),
+            & (_df["ADX"] > self.adx_threshold),
             LongEntry.flag_col,
         ] = True
 
         _df.loc[
             (ta.cross(_df["MACD"], _df["MACD_S"], above=False) == 1)
             & (_df["close"] < _df["VWAP"])
-            & (_df["ADX"] > 25),
+            & (_df["ADX"] > self.adx_threshold),
             ShortEntry.flag_col,
         ] = True
 
         return _df
 
-    def populate_subplots(self, df: DataFrame) -> DataFrame:
+    def populate_subplots(self, df):
         _df = df.copy()
 
-        _df.loc[
-            _df[LongEntry.flag_col] == True,
-            "LongMarker",
-        ] = (
-            _df.loc[_df[LongEntry.flag_col] == True]["high"] + 1
-        )
-        _df.loc[
-            _df[ShortEntry.flag_col] == True,
-            "ShortMarker",
-        ] = (
-            _df.loc[_df[ShortEntry.flag_col] == True]["low"] - 1
-        )
+        long_marker = _df[LongEntry.flag_col] == True
+        short_marker = _df[ShortEntry.flag_col] == True
+        _df.loc[long_marker, "LongMarker"] = _df.loc[long_marker]["high"]
+        _df.loc[short_marker, "ShortMarker"] = _df.loc[short_marker]["low"]
 
         return [
             mpf.make_addplot(
@@ -81,7 +74,7 @@ class MACDVWAP(Strategy):
                 secondary_y=False,
             ),
             mpf.make_addplot(
-                _df["ADX"].apply(lambda _: 25),
+                _df["ADX"].apply(lambda _: self.adx_threshold),
                 panel=3,
                 width=1,
                 linestyle="--",

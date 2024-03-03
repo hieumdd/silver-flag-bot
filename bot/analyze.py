@@ -12,6 +12,8 @@ def on_analyze(strategy: Strategy):
     async def _on_analyze(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         logger.info(f"Analyzing strategy {strategy.__class__}")
 
+        await update.message.reply_chat_action("upload_photo")
+
         analysis, _ = strategy.analyze()
 
         await update.message.reply_photo(
