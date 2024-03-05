@@ -1,33 +1,31 @@
 import numpy as np
 import pandas_ta as ta
-import mplfinance as mpf
 
-from data.provider import IntradayDataProvider
+from trading.timeframe import TF_5MIN
+from trading.data import IntradayDataProvider
 from trading.signal.model import LongEntry, ShortEntry
 from trading.strategy.interface import Strategy
 
 
 class ATRTrailingStop(Strategy):
-    data_provider = IntradayDataProvider()
+    data_provider = IntradayDataProvider(TF_5MIN)
 
     atr_length = 10
     n_loss_sensitivity = 2
 
     def populate_indicators(self, df):
-        _df = df.copy()
-
-        _df["ATR"] = ta.atr(
-            _df["high"],
-            _df["low"],
-            _df["close"],
+        df["ATR"] = ta.atr(
+            df["high"],
+            df["low"],
+            df["close"],
             length=self.atr_length,
         )
-        _df["NLOSS"] = _df["ATR"] * self.n_loss_sensitivity
+        df["NLOSS"] = df["ATR"] * self.n_loss_sensitivity
 
-        _df = _df.dropna()
+        df = df.dropna()
 
-        _df["ATR_TRAILING_STOP"] = np.nan
-        _df.loc[_df.index[0], "ATR_TRAILING_STOP"] = 0.0
+        df["ATR_TRAILING_STOP"] = np.nan
+        df.loc[df.index[0], "ATR_TRAILING_STOP"] = 0.0
 
         def set_atr_trailing_stop(
             close: float,
@@ -44,70 +42,29 @@ class ATRTrailingStop(Strategy):
             else:
                 return close + nloss
 
-        for i in range(1, len(_df)):
-            _df.loc[_df.index[i], "ATR_TRAILING_STOP"] = set_atr_trailing_stop(
-                _df.loc[_df.index[i], "close"],
-                _df.loc[_df.index[i - 1], "close"],
-                _df.loc[_df.index[i - 1], "ATR_TRAILING_STOP"],
-                _df.loc[_df.index[i], "NLOSS"],
+        for i in range(1, len(df)):
+            df.loc[df.index[i], "ATR_TRAILING_STOP"] = set_atr_trailing_stop(
+                df.loc[df.index[i], "close"],
+                df.loc[df.index[i - 1], "close"],
+                df.loc[df.index[i - 1], "ATR_TRAILING_STOP"],
+                df.loc[df.index[i], "NLOSS"],
             )
 
-        _df["EMA"] = ta.ema(_df["close"], 1, talib=False)
+        df["EMA"] = ta.ema(df["close"], 1, talib=False)
 
-        return _df
+        return df
 
     def populate_signals(self, df):
-        _df = df.copy()
-
-        _df.loc[
-            (_df["close"] > _df["ATR_TRAILING_STOP"])
-            & (ta.cross(_df["EMA"], _df["ATR_TRAILING_STOP"], above=True) == 1),
+        df.loc[
+            (df["close"] > df["ATR_TRAILING_STOP"])
+            & (ta.cross(df["EMA"], df["ATR_TRAILING_STOP"], above=True) == 1),
             LongEntry.flag_col,
         ] = True
 
-        _df.loc[
-            (_df["close"] < _df["ATR_TRAILING_STOP"])
-            & (ta.cross(_df["EMA"], _df["ATR_TRAILING_STOP"], above=False) == 1),
+        df.loc[
+            (df["close"] < df["ATR_TRAILING_STOP"])
+            & (ta.cross(df["EMA"], df["ATR_TRAILING_STOP"], above=False) == 1),
             ShortEntry.flag_col,
         ] = True
 
-        return _df
-
-    def populate_subplots(self, df):
-        _df = df.copy()
-
-        long_marker = _df[LongEntry.flag_col] == True
-        short_marker = _df[ShortEntry.flag_col] == True
-        _df.loc[long_marker, "LongMarker"] = _df.loc[long_marker]["high"]
-        _df.loc[short_marker, "ShortMarker"] = _df.loc[short_marker]["low"]
-
-        return [
-            *(
-                []
-                if _df["LongMarker"].isnull().all()
-                else [
-                    mpf.make_addplot(
-                        _df["LongMarker"],
-                        type="scatter",
-                        panel=0,
-                        marker="^",
-                        markersize=200,
-                        color="lime",
-                    )
-                ]
-            ),
-            *(
-                []
-                if _df["ShortMarker"].isnull().all()
-                else [
-                    mpf.make_addplot(
-                        _df["ShortMarker"],
-                        type="scatter",
-                        panel=0,
-                        marker="v",
-                        markersize=200,
-                        color="pink",
-                    )
-                ]
-            ),
-        ]
+        return df
