@@ -37,11 +37,6 @@ class MACDVWAP(Strategy):
         return df
 
     def populate_subplots(self, df):
-        long_marker = df[LongEntry.flag_col] == True
-        short_marker = df[ShortEntry.flag_col] == True
-        df.loc[long_marker, "LongMarker"] = df.loc[long_marker]["high"]
-        df.loc[short_marker, "ShortMarker"] = df.loc[short_marker]["low"]
-
         return [
             mpf.make_addplot(
                 df["VWAP"],
@@ -74,33 +69,5 @@ class MACDVWAP(Strategy):
                 width=1,
                 linestyle="--",
                 secondary_y=False,
-            ),
-            *(
-                []
-                if df["LongMarker"].isnull().all()
-                else [
-                    mpf.make_addplot(
-                        df["LongMarker"],
-                        type="scatter",
-                        panel=0,
-                        marker="^",
-                        markersize=200,
-                        color="lime",
-                    )
-                ]
-            ),
-            *(
-                []
-                if df["ShortMarker"].isnull().all()
-                else [
-                    mpf.make_addplot(
-                        df["ShortMarker"],
-                        type="scatter",
-                        panel=0,
-                        marker="v",
-                        markersize=200,
-                        color="pink",
-                    )
-                ]
             ),
         ]
