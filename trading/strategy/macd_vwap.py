@@ -13,69 +13,63 @@ class MACDVWAP(Strategy):
     adx_threshold = 25
 
     def populate_indicators(self, df):
-        _df = df.copy()
+        df[["MACD", "MACD_H", "MACD_S"]] = ta.macd(df["close"])
+        df["VWAP"] = ta.vwap(df["high"], df["low"], df["close"], df["volume"])
+        df[["ADX", "DI+", "DI-"]] = ta.adx(df["high"], df["low"], df["close"])
 
-        _df[["MACD", "MACD_H", "MACD_S"]] = ta.macd(_df["close"])
-        _df["VWAP"] = ta.vwap(_df["high"], _df["low"], _df["close"], _df["volume"])
-        _df[["ADX", "DI+", "DI-"]] = ta.adx(_df["high"], _df["low"], _df["close"])
-
-        return _df
+        return df
 
     def populate_signals(self, df):
-        _df = df.copy()
-
-        _df.loc[
-            (ta.cross(_df["MACD"], _df["MACD_S"]) == 1)
-            & (_df["close"] > _df["VWAP"])
-            & (_df["ADX"] > self.adx_threshold),
+        df.loc[
+            (ta.cross(df["MACD"], df["MACD_S"]) == 1)
+            & (df["close"] > df["VWAP"])
+            & (df["ADX"] > self.adx_threshold),
             LongEntry.flag_col,
         ] = True
 
-        _df.loc[
-            (ta.cross(_df["MACD"], _df["MACD_S"], above=False) == 1)
-            & (_df["close"] < _df["VWAP"])
-            & (_df["ADX"] > self.adx_threshold),
+        df.loc[
+            (ta.cross(df["MACD"], df["MACD_S"], above=False) == 1)
+            & (df["close"] < df["VWAP"])
+            & (df["ADX"] > self.adx_threshold),
             ShortEntry.flag_col,
         ] = True
 
-        return _df
+        return df
 
     def populate_subplots(self, df):
-        _df = df.copy()
-
-        long_marker = _df[LongEntry.flag_col] == True
-        short_marker = _df[ShortEntry.flag_col] == True
-        _df.loc[long_marker, "LongMarker"] = _df.loc[long_marker]["high"]
-        _df.loc[short_marker, "ShortMarker"] = _df.loc[short_marker]["low"]
+        long_marker = df[LongEntry.flag_col] == True
+        short_marker = df[ShortEntry.flag_col] == True
+        df.loc[long_marker, "LongMarker"] = df.loc[long_marker]["high"]
+        df.loc[short_marker, "ShortMarker"] = df.loc[short_marker]["low"]
 
         return [
             mpf.make_addplot(
-                _df["VWAP"],
+                df["VWAP"],
                 panel=0,
                 width=1,
                 secondary_y=False,
             ),
             mpf.make_addplot(
-                _df["MACD"],
+                df["MACD"],
                 panel=2,
                 width=1,
                 secondary_y=False,
             ),
             mpf.make_addplot(
-                _df["MACD_S"],
+                df["MACD_S"],
                 panel=2,
                 width=1,
                 linestyle="--",
                 secondary_y=False,
             ),
             mpf.make_addplot(
-                _df["ADX"],
+                df["ADX"],
                 panel=3,
                 width=1,
                 secondary_y=False,
             ),
             mpf.make_addplot(
-                _df["ADX"].apply(lambda _: self.adx_threshold),
+                df["ADX"].apply(lambda _: self.adx_threshold),
                 panel=3,
                 width=1,
                 linestyle="--",
@@ -83,10 +77,10 @@ class MACDVWAP(Strategy):
             ),
             *(
                 []
-                if _df["LongMarker"].isnull().all()
+                if df["LongMarker"].isnull().all()
                 else [
                     mpf.make_addplot(
-                        _df["LongMarker"],
+                        df["LongMarker"],
                         type="scatter",
                         panel=0,
                         marker="^",
@@ -97,10 +91,10 @@ class MACDVWAP(Strategy):
             ),
             *(
                 []
-                if _df["ShortMarker"].isnull().all()
+                if df["ShortMarker"].isnull().all()
                 else [
                     mpf.make_addplot(
-                        _df["ShortMarker"],
+                        df["ShortMarker"],
                         type="scatter",
                         panel=0,
                         marker="v",

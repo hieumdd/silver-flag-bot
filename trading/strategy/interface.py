@@ -29,54 +29,41 @@ class Strategy(metaclass=ABCMeta):
     def populate_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         pass
 
-    def generate_indicators(self, df: Optional[pd.DataFrame] = None) -> pd.DataFrame:
-        return self.populate_indicators(df if df is not None else self.get_data())
+    def generate_indicators(self) -> pd.DataFrame:
+        return self.populate_indicators(self.get_data().copy())
 
     @abstractmethod
     def populate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
         pass
 
-    def generate_signals(self, df: Optional[pd.DataFrame] = None) -> pd.DataFrame:
-        return self.populate_signals(
-            df if df is not None else self.generate_indicators()
-        )
+    def generate_signals(self) -> pd.DataFrame:
+        return self.populate_signals(self.generate_indicators().copy())
 
     def populate_subplots(self, df: pd.DataFrame) -> list[dict]:
         return []
 
-    def generate_plot(
-        self,
-        df: Optional[pd.DataFrame] = None,
-        candles: Optional[int] = 90,
-    ) -> io.BytesIO:
-        _df = (df if df is not None else self.generate_signals()).iloc[-candles:]
+    def analyze(self, candles: Optional[int] = 90) -> tuple[Analysis, Optional[Signal]]:
+        df = self.generate_signals().iloc[-candles:]
 
-        buffer = io.BytesIO()
-        mpf.plot(
-            _df,
-            type="candle",
-            tight_layout=True,
-            volume=True,
-            figratio=(16, 10),
-            style="tradingview",
-            addplot=self.populate_subplots(_df),
-            savefig=buffer,
-        )
-        buffer.seek(0)
+        def create_plot():
+            plot = io.BytesIO()
+            mpf.plot(
+                df,
+                type="candle",
+                tight_layout=True,
+                volume=True,
+                figratio=(16, 10),
+                style="tradingview",
+                addplot=self.populate_subplots(df),
+                savefig=plot,
+            )
+            plot.seek(0)
+            return plot
 
-        return buffer
-
-    def analyze(
-        self,
-        df: Optional[pd.DataFrame] = None,
-        candles: Optional[int] = 90,
-    ) -> tuple[Analysis, Optional[Signal]]:
-        _df = df if df is not None else self.generate_signals()
-
-        latest_candle = _df.iloc[-1, :]
+        latest_candle = df.iloc[-1, :]
         logger.debug("Latest candle", extra={"latest_candle": latest_candle.to_dict()})
 
-        def _parse_signal() -> Optional[Signal]:
+        def create_signal() -> Optional[Signal]:
             long_entry = latest_candle[LongEntry.flag_col] == True
             short_entry = latest_candle[ShortEntry.flag_col] == True
 
@@ -93,7 +80,7 @@ class Strategy(metaclass=ABCMeta):
                 strategy=str(type(self).__name__),
                 symbol=self.symbol,
                 timestamp=latest_candle.name.to_pydatetime().isoformat(),
-                plot=self.generate_plot(_df, candles),
+                plot=create_plot(),
             ),
-            _parse_signal(),
+            create_signal(),
         )
