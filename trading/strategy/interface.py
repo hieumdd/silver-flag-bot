@@ -86,30 +86,33 @@ class Strategy(metaclass=ABCMeta):
         plot.seek(0)
         return plot
 
-    def analyze(self, candles: Optional[int] = 90) -> tuple[Analysis, Optional[Signal]]:
-        df = self.generate_signals().iloc[-candles:]
-
+    def create_signal(self, df: pd.DataFrame) -> Optional[Signal]:
         latest_candle = df.iloc[-1, :]
         logger.debug("Latest candle", extra={"latest_candle": latest_candle.to_dict()})
 
-        def create_signal() -> Optional[Signal]:
-            long_entry = latest_candle[LongEntry.flag_col] == True
-            short_entry = latest_candle[ShortEntry.flag_col] == True
+        long_entry = latest_candle[LongEntry.flag_col] == True
+        short_entry = latest_candle[ShortEntry.flag_col] == True
 
-            if long_entry and not short_entry:
-                return Signal(LongEntry, str(latest_candle["close"]))
+        signal = None
+        if long_entry and not short_entry:
+            signal = Signal(LongEntry, str(latest_candle["close"]))
+        elif short_entry and not long_entry:
+            signal = Signal(ShortEntry, str(latest_candle["close"]))
 
-            if short_entry and not long_entry:
-                return Signal(ShortEntry, str(latest_candle["close"]))
+        return signal
 
-            return None
+    def analyze(self, candles: Optional[int] = 90) -> tuple[Analysis, Optional[Signal]]:
+        df = self.generate_signals()
+
+        plot = self.create_plot(df, candles)
+        signal = self.create_signal(df)
 
         return (
             Analysis(
                 strategy=str(type(self).__name__),
                 symbol=self.symbol,
-                timestamp=latest_candle.name.to_pydatetime().isoformat(),
-                plot=self.create_plot(df),
+                timestamp=df.index[-1].to_pydatetime().isoformat(),
+                plot=plot,
             ),
-            create_signal(),
+            signal,
         )
