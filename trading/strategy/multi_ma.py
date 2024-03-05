@@ -5,7 +5,7 @@ import pandas_ta as ta
 
 from trading.timeframe import TF_1MIN
 from trading.data import IntradayDataProvider
-from trading.signal.model import LongEntry, ShortEntry
+from trading.signal import LongEntry, ShortEntry
 from trading.strategy.interface import Strategy
 
 

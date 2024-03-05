@@ -8,7 +8,7 @@ import mplfinance as mpf
 
 from logger import get_logger
 from trading.data import DataProvider
-from trading.signal.model import Analysis, Signal, LongEntry, ShortEntry
+from trading.signal import Analysis, Signal, LongEntry, ShortEntry
 
 
 logger = get_logger(__name__)
