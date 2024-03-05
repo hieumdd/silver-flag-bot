@@ -14,40 +14,37 @@ class MultiMA(Strategy):
     _range = range(5, 105, 5)
 
     def populate_indicators(self, df):
-        _df = df.copy()
-
-        _df["RSI"] = ta.rsi(_df["close"])
-        _df["RSI_CROSS_ABOVE"] = ta.cross_value(_df["RSI"], 50)
-        _df["RSI_CROSS_BELOW"] = ta.cross_value(_df["RSI"], 50, above=False)
+        df["RSI"] = ta.rsi(df["close"])
+        df["RSI_CROSS_ABOVE"] = ta.cross_value(df["RSI"], 50)
+        df["RSI_CROSS_BELOW"] = ta.cross_value(df["RSI"], 50, above=False)
         for length in self._range:
-            _df[f"EMA_{length}"] = ta.ema(_df["close"], length=length)
-        return _df
+            df[f"EMA_{length}"] = ta.ema(df["close"], length=length)
+
+        return df
 
     def populate_signals(self, df):
-        _df = df.copy()
-
-        _df.loc[
+        df.loc[
             reduce(
                 operator.and_,
                 [
-                    _df[f"EMA_{length}"] > _df[f"EMA_{length}"].shift(1)
+                    df[f"EMA_{length}"] > df[f"EMA_{length}"].shift(1)
                     for length in self._range
                 ]
-                + [_df["RSI_CROSS_ABOVE"] == 1],
+                + [df["RSI_CROSS_ABOVE"] == 1],
             ),
             LongEntry.flag_col,
         ] = True
 
-        _df.loc[
+        df.loc[
             reduce(
                 operator.and_,
                 [
-                    _df[f"EMA_{length}"] < _df[f"EMA_{length}"].shift(1)
+                    df[f"EMA_{length}"] < df[f"EMA_{length}"].shift(1)
                     for length in self._range
                 ]
-                + [_df["RSI_CROSS_BELOW"] == 1],
+                + [df["RSI_CROSS_BELOW"] == 1],
             ),
             ShortEntry.flag_col,
         ] = True
 
-        return _df
+        return df
