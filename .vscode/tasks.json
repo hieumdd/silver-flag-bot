@@ -1,0 +1,16 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "docker:build",
+            "type": "shell",
+            "command": "docker-compose build"
+        },
+        {
+            "label": "docker:push",
+            "type": "shell",
+            "command": "docker-compose push",
+            "dependsOn": "docker:build"
+        },
+    ]
+}
