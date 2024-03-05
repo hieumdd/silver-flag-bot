@@ -1,10 +1,8 @@
-from datetime import datetime
+from datetime import datetime, date
 import os
 
 import jwt
 import httpx
-
-from ssi.options import GetIntradayOptions
 
 DATA_API_BASE_URL = "https://fc-data.ssi.com.vn/api/v2/Market"
 
@@ -66,7 +64,7 @@ class SSIClient:
             event_hooks={"response": [validate_status_code, validate_error]},
         )
 
-    def get_intraday(self, options: GetIntradayOptions):
+    def get_intraday(self, symbol: str, start_date: date, end_date: date):
         page_size = 1000
 
         def _request(page_index=1):
@@ -75,12 +73,12 @@ class SSIClient:
                     method="GET",
                     url="/IntradayOhlc",
                     params={
-                        "Symbol": options.symbol,
-                        "FromDate": options.start_date.strftime("%d/%m/%Y"),
-                        "ToDate": options.end_date.strftime("%d/%m/%Y"),
+                        "Symbol": symbol,
+                        "FromDate": start_date.strftime("%d/%m/%Y"),
+                        "ToDate": end_date.strftime("%d/%m/%Y"),
                         "PageIndex": page_index,
                         "PageSize": page_size,
-                        "resolution": options.resolution,
+                        "resolution": "1m",
                         "ascending": True,
                     },
                 )

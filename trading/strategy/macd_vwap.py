@@ -1,13 +1,14 @@
 import pandas_ta as ta
 import mplfinance as mpf
 
-from data.provider import IntradayDataProvider
+from trading.timeframe import TF_1MIN
+from trading.data import IntradayDataProvider
 from trading.signal.model import LongEntry, ShortEntry
 from trading.strategy.interface import Strategy
 
 
 class MACDVWAP(Strategy):
-    data_provider = IntradayDataProvider()
+    data_provider = IntradayDataProvider(TF_1MIN)
 
     adx_threshold = 25
 

@@ -6,7 +6,7 @@ import pandas as pd
 import mplfinance as mpf
 
 from logger import get_logger
-from data.provider import DataProvider
+from trading.data import DataProvider
 from trading.signal.model import Analysis, Signal, LongEntry, ShortEntry
 
 
