@@ -23,8 +23,6 @@ if __name__ == "__main__":
         .build()
     )
 
-    strategy.data_provider.timeframe.crons()
-
     for trigger in strategy.data_provider.timeframe.crons():
         application.job_queue.run_custom(
             polling,
