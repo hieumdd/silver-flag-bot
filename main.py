@@ -3,14 +3,14 @@ import os
 from telegram.ext import Application, CommandHandler
 
 from logger import init_logger
-from trading.strategy.macd_vwap import MACDVWAP
+from trading.strategy.atr_trailing_stop import ATRTrailingStop
 from bot.polling import polling
 from bot.analyze import on_analyze
 
 init_logger()
 
 if __name__ == "__main__":
-    strategy = MACDVWAP("VN30F1M")
+    strategy = ATRTrailingStop("VN30F1M")
     chat_id = -4154075164
 
     async def post_init(application: Application):
