@@ -3,13 +3,14 @@ import operator
 
 import pandas_ta as ta
 
-from data.provider import IntradayDataProvider
+from trading.timeframe import TF_1MIN
+from trading.data import IntradayDataProvider
 from trading.signal.model import LongEntry, ShortEntry
 from trading.strategy.interface import Strategy
 
 
 class MultiMA(Strategy):
-    data_provider = IntradayDataProvider()
+    data_provider = IntradayDataProvider(TF_1MIN)
     _range = range(5, 105, 5)
 
     def populate_indicators(self, df):
