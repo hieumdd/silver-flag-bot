@@ -27,28 +27,24 @@ class ATRTrailingStop(Strategy):
         df["ATR_TRAILING_STOP"] = np.nan
         df.loc[df.index[0], "ATR_TRAILING_STOP"] = 0.0
 
-        def set_atr_trailing_stop(
-            close: float,
-            prev_close: float,
-            prev_atr_trailing_stop: float,
-            nloss: float,
-        ):
-            if close > prev_atr_trailing_stop and prev_close > prev_atr_trailing_stop:
-                return max(prev_atr_trailing_stop, close - nloss)
-            elif close < prev_atr_trailing_stop and prev_close < prev_atr_trailing_stop:
-                return min(prev_atr_trailing_stop, close + nloss)
-            elif close > prev_atr_trailing_stop:
-                return close - nloss
-            else:
-                return close + nloss
-
         for i in range(1, len(df)):
-            df.loc[df.index[i], "ATR_TRAILING_STOP"] = set_atr_trailing_stop(
-                df.loc[df.index[i], "close"],
-                df.loc[df.index[i - 1], "close"],
-                df.loc[df.index[i - 1], "ATR_TRAILING_STOP"],
-                df.loc[df.index[i], "NLOSS"],
-            )
+            close = df.loc[df.index[i], "close"]
+            prev_close = df.loc[df.index[i - 1], "close"]
+            prev_atr_trailing_stop = df.loc[df.index[i - 1], "ATR_TRAILING_STOP"]
+            n_loss = df.loc[df.index[i], "NLOSS"]
+
+            atr_trailing_stop = 0
+
+            if close > prev_atr_trailing_stop and prev_close > prev_atr_trailing_stop:
+                atr_trailing_stop = max(prev_atr_trailing_stop, close - n_loss)
+            elif close < prev_atr_trailing_stop and prev_close < prev_atr_trailing_stop:
+                atr_trailing_stop = min(prev_atr_trailing_stop, close + n_loss)
+            elif close > prev_atr_trailing_stop:
+                atr_trailing_stop = close - n_loss
+            else:
+                atr_trailing_stop = close + n_loss
+
+            df.loc[df.index[i], "ATR_TRAILING_STOP"] = atr_trailing_stop
 
         df["EMA"] = ta.ema(df["close"], 1, talib=False)
 
