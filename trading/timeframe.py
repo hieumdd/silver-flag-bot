@@ -1,21 +1,20 @@
+from dataclasses import dataclass
+from datetime import datetime, timedelta
 from functools import partial
 from typing import Callable
 from zoneinfo import ZoneInfo
 
 
 from apscheduler.triggers.cron import CronTrigger
+import pandas as pd
 
 
+@dataclass
 class Timeframe:
-    def __init__(
-        self,
-        interval: str,
-        cron_hour: Callable[[str], str] = lambda x: x,
-        cron_minute: Callable[[str], str] = lambda x: x,
-    ):
-        self.interval = interval
-        self.cron_hour = cron_hour
-        self.cron_minute = cron_minute
+    interval: str
+    finished_candle_threshold: timedelta
+    cron_hour: Callable[[str], str] = lambda x: x
+    cron_minute: Callable[[str], str] = lambda x: x
 
     def crons(self):
         base_cron = partial(
@@ -31,7 +30,13 @@ class Timeframe:
             base_cron(hour=self.cron_hour("14"), minute=self.cron_minute("0-30")),
         ]
 
+    def is_finished(self, df: pd.Index) -> pd.Series:
+        now = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).replace(tzinfo=None)
+        return df.index < now - self.finished_candle_threshold
 
-TF_1MIN = Timeframe("1min", lambda x: x, lambda _: "*")
-TF_5MIN = Timeframe("5min", lambda x: x, lambda cron: f"{cron}/5")
-TF_15MIN = Timeframe("15min", lambda x: x, lambda cron: f"{cron}/15")
+
+TF_1MIN = Timeframe("1min", timedelta(minutes=1), lambda x: x, lambda _: "*")
+TF_5MIN = Timeframe("5min", timedelta(minutes=5), lambda x: x, lambda cron: f"{cron}/5")
+TF_15MIN = Timeframe(
+    "15min", timedelta(minutes=15), lambda x: x, lambda cron: f"{cron}/15"
+)
