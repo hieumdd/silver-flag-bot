@@ -50,7 +50,7 @@ class IntradayDataProvider(DataProvider):
                 .astype({col_name: float for col_name in self.ohlc_columns})
             )[["symbol", "timestamp", *self.ohlc_columns.keys()]]
             .resample(self.timeframe.interval)
-            .agg(self.ohlc_columns)
+            .agg({**self.ohlc_columns, "timestamp": "first"})
             .dropna()
         )
 
