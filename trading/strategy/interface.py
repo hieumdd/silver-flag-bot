@@ -88,7 +88,10 @@ class Strategy(metaclass=ABCMeta):
 
     def create_signal(self, df: pd.DataFrame) -> Optional[Signal]:
         candle = df.loc[self.data_provider.timeframe.is_finished(df)].iloc[0]
-        logger.debug("Latest candle", extra={"latest_candle": candle.to_dict()})
+        logger.debug(
+            f"[O] {candle['open']} [H] {candle['high']} [L] {candle['low']} [C] {candle['close']}",
+            extra={"candle": candle.to_dict()},
+        )
 
         long_entry = candle[LongEntry.flag_col] == True
         short_entry = candle[ShortEntry.flag_col] == True
