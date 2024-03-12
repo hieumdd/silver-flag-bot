@@ -12,5 +12,10 @@
             "command": "docker-compose push",
             "dependsOn": "docker:build"
         },
+        {
+            "label": "echo:update-container",
+            "type": "shell",
+            "command": "echo gcloud compute instances update-container instance-1 --container-image=hieumdd/silver-flag-bot",
+        },
     ]
 }
