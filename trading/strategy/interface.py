@@ -87,7 +87,7 @@ class Strategy(metaclass=ABCMeta):
         return plot
 
     def create_signal(self, df: pd.DataFrame) -> Optional[Signal]:
-        candle = df.loc[self.data_provider.timeframe.is_finished(df)].iloc[0]
+        candle = df.loc[df.index < self.data_provider.timeframe.is_finished()].iloc[-1]
         logger.debug(
             f"[O] {candle['open']} [H] {candle['high']} [L] {candle['low']} [C] {candle['close']}",
             extra={"candle": candle.to_dict()},

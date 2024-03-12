@@ -4,9 +4,7 @@ from functools import partial
 from typing import Callable
 from zoneinfo import ZoneInfo
 
-
 from apscheduler.triggers.cron import CronTrigger
-import pandas as pd
 
 
 @dataclass
@@ -30,9 +28,9 @@ class Timeframe:
             base_cron(hour=self.cron_hour("14"), minute=self.cron_minute("0-30")),
         ]
 
-    def is_finished(self, df: pd.Index) -> pd.Series:
+    def is_finished(self) -> datetime:
         now = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).replace(tzinfo=None)
-        return df.index < now - self.finished_candle_threshold
+        return now - self.finished_candle_threshold
 
 
 TF_1MIN = Timeframe("1min", timedelta(minutes=1), lambda x: x, lambda _: "*")
