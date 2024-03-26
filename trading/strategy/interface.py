@@ -9,7 +9,8 @@ import mplfinance as mpf
 
 from logger import get_logger
 from trading.data import DataProvider
-from trading.signal import Analysis, Signal, Long, Short
+from trading.signal import Signal, Long, Short
+from trading.analysis import Analysis
 
 
 logger = get_logger(__name__)
@@ -88,12 +89,12 @@ class Strategy(metaclass=ABCMeta):
         plot.seek(0)
         return plot
 
-    def create_signal(self, df: pd.DataFrame) -> Optional[Signal]:
+    def analyze(self, candles: Optional[int] = 90) -> tuple[Analysis, Optional[Signal]]:
+        df = self.generate_signals()
+
         candle = df.loc[df.index < self.data_provider.timeframe.is_finished()].iloc[-1]
-        logger.debug(
-            f"[O] {candle['open']} [H] {candle['high']} [L] {candle['low']} [C] {candle['close']}",
-            extra={"candle": candle.to_dict()},
-        )
+        message = f"[O] {candle['open']} [H] {candle['high']} [L] {candle['low']} [C] {candle['close']}"
+        logger.debug(message, extra={"candle": candle.to_dict()})
 
         long_entry = candle[Long.value_col] != np.nan
         short_entry = candle[Short.value_col] != np.nan
@@ -104,19 +105,11 @@ class Strategy(metaclass=ABCMeta):
         elif short_entry and not long_entry:
             signal = Signal(Short, str(candle[Short.value_col]))
 
-        return signal
-
-    def analyze(self, candles: Optional[int] = 90) -> tuple[Analysis, Optional[Signal]]:
-        df = self.generate_signals()
-
         plot = self.create_plot(df, candles)
-        signal = self.create_signal(df)
 
         return (
             Analysis(
-                strategy=str(type(self).__name__),
-                symbol=self.symbol,
-                timestamp=df.index[-1].to_pydatetime().isoformat(),
+                summary=f"{self.symbol} @ {candle['timestamp'].to_pydatetime().isoformat()}\n{message}",
                 plot=plot,
             ),
             signal,

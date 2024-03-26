@@ -27,16 +27,3 @@ class Signal:
         return emoji.emojize(
             f"{self.type_.emoji_short_code} {symbol} @ <code>{self.value}</code> {self.type_.tag.upper()}"
         )
-
-
-@dataclass
-class Analysis:
-    strategy: str
-    symbol: str
-    timestamp: str
-    plot: io.BytesIO
-
-    def to_html(self):
-        return emoji.emojize(
-            f":blue_circle: {self.strategy} :: {self.symbol} @ {self.timestamp}"
-        )
