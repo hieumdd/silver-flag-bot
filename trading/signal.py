@@ -6,14 +6,16 @@ import emoji
 
 @dataclass
 class SignalType:
-    flag_col: str
-    marker_col: str
-    message: str
+    tag: str
     emoji_short_code: str
 
+    @property
+    def value_col(self):
+        return f"{self.tag}Value"
 
-LongEntry = SignalType("LongEntry", "LongMarker", "LONG", ":green_circle:")
-ShortEntry = SignalType("ShortEntry", "ShortMarker", "SHORT", ":red_circle:")
+
+Long = SignalType("Long", ":green_circle:")
+Short = SignalType("Short", ":green_circle:")
 
 
 @dataclass
@@ -23,7 +25,7 @@ class Signal:
 
     def to_html(self, symbol: str):
         return emoji.emojize(
-            f"{self.type_.emoji_short_code} {symbol} @ <code>{self.value}</code> {self.type_.message}"
+            f"{self.type_.emoji_short_code} {symbol} @ <code>{self.value}</code> {self.type_.tag.upper()}"
         )
 
 
