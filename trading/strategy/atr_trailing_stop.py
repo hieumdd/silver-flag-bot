@@ -4,7 +4,7 @@ import mplfinance as mpf
 
 from trading.timeframe import TF_5MIN
 from trading.data import IntradayDataProvider
-from trading.signal import LongEntry, ShortEntry
+from trading.signal import Long, Short
 from trading.strategy.interface import Strategy
 
 
@@ -60,15 +60,14 @@ class ATRTrailingStop(Strategy):
         df.loc[
             (df["SRC"] > df["ATR_TRAILING_STOP"])
             & (ta.cross(df["MA"], df["ATR_TRAILING_STOP"], above=True) == 1),
-            LongEntry.flag_col,
-        ] = True
+            Long.value_col,
+        ] = df["SRC"]
 
         df.loc[
             (df["SRC"] < df["ATR_TRAILING_STOP"])
             & (ta.cross(df["MA"], df["ATR_TRAILING_STOP"], above=False) == 1),
-            ShortEntry.flag_col,
-        ] = True
-        df.loc[df[ShortEntry.flag_col] == True, 'ShortValue'] = df["SRC"]
+            Short.value_col,
+        ] = df["SRC"]
 
         return df
 
@@ -79,6 +78,7 @@ class ATRTrailingStop(Strategy):
                 panel=0,
                 width=1,
                 secondary_y=False,
+                label="ATR Trailing Stop",
             ),
             mpf.make_addplot(
                 df["MA"],
@@ -86,5 +86,6 @@ class ATRTrailingStop(Strategy):
                 width=1,
                 linestyle="--",
                 secondary_y=False,
+                label="MA",
             ),
         ]

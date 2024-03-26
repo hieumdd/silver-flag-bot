@@ -3,12 +3,14 @@ from functools import partial
 import io
 from typing import Optional
 
+import numpy as np
 import pandas as pd
 import mplfinance as mpf
 
 from logger import get_logger
 from trading.data import DataProvider
-from trading.signal import Analysis, Signal, LongEntry, ShortEntry
+from trading.signal import Signal, Long, Short
+from trading.analysis import Analysis
 
 
 logger = get_logger(__name__)
@@ -39,7 +41,7 @@ class Strategy(metaclass=ABCMeta):
 
     def generate_signals(self) -> pd.DataFrame:
         df = self.generate_indicators().copy()
-        df.loc[:, [LongEntry.flag_col, ShortEntry.flag_col]] = (False, False)
+        df.loc[:, [Long.value_col, Short.value_col]] = (np.nan, np.nan)
         return self.populate_signals(df)
 
     def populate_subplots(self, df: pd.DataFrame) -> list[dict]:
@@ -56,27 +58,28 @@ class Strategy(metaclass=ABCMeta):
             markersize=200,
         )
 
-        long_entry = df[LongEntry.flag_col] == True
-        df.loc[long_entry, LongEntry.marker_col] = df.loc[long_entry, "high"]
+        long_marker = f"{Long.tag}Marker"
+        df[long_marker] = np.nan
+        df.loc[df[Long.value_col].notnull(), long_marker] = df["high"]
         long_signal_plot = (
             []
-            if df[LongEntry.marker_col].isna().all()
-            else [signal_plot(df[LongEntry.marker_col], marker="^", color="lime")]
+            if df[Long.value_col].isna().all()
+            else [signal_plot(df[long_marker] + 0.3, marker=10, color="mediumseagreen")]
         )
 
-        short_entry = df[ShortEntry.flag_col] == True
-        df.loc[short_entry, ShortEntry.marker_col] = df.loc[short_entry, "low"]
+        short_marker = f"{Short.tag}Marker"
+        df[short_marker] = np.nan
+        df.loc[df[Short.value_col].notnull(), short_marker] = df["low"]
         short_signal_plot = (
             []
-            if df[ShortEntry.marker_col].isna().all()
-            else [signal_plot(df[ShortEntry.marker_col], marker="v", color="pink")]
+            if df[Short.value_col].isna().all()
+            else [signal_plot(df[short_marker] - 0.3, marker=11, color="lightcoral")]
         )
 
         plot = io.BytesIO()
         mpf.plot(
             df,
             type="candle",
-            tight_layout=True,
             volume=True,
             figratio=(16, 10),
             style="tradingview",
@@ -86,35 +89,27 @@ class Strategy(metaclass=ABCMeta):
         plot.seek(0)
         return plot
 
-    def create_signal(self, df: pd.DataFrame) -> Optional[Signal]:
-        candle = df.loc[df.index < self.data_provider.timeframe.is_finished()].iloc[-1]
-        logger.debug(
-            f"[O] {candle['open']} [H] {candle['high']} [L] {candle['low']} [C] {candle['close']}",
-            extra={"candle": candle.to_dict()},
-        )
-
-        long_entry = candle[LongEntry.flag_col] == True
-        short_entry = candle[ShortEntry.flag_col] == True
-
-        signal = None
-        if long_entry and not short_entry:
-            signal = Signal(LongEntry, str(candle["close"]))
-        elif short_entry and not long_entry:
-            signal = Signal(ShortEntry, str(candle["close"]))
-
-        return signal
-
     def analyze(self, candles: Optional[int] = 90) -> tuple[Analysis, Optional[Signal]]:
         df = self.generate_signals()
 
+        candle = df.loc[df.index < self.data_provider.timeframe.is_finished()].iloc[-1]
+        message = f"[O] {candle['open']} [H] {candle['high']} [L] {candle['low']} [C] {candle['close']}"
+        logger.debug(message, extra={"candle": candle.to_dict()})
+
+        long_entry = candle[Long.value_col] != np.nan
+        short_entry = candle[Short.value_col] != np.nan
+
+        signal = None
+        if long_entry and not short_entry:
+            signal = Signal(Long, str(candle[Long.value_col]))
+        elif short_entry and not long_entry:
+            signal = Signal(Short, str(candle[Short.value_col]))
+
         plot = self.create_plot(df, candles)
-        signal = self.create_signal(df)
 
         return (
             Analysis(
-                strategy=str(type(self).__name__),
-                symbol=self.symbol,
-                timestamp=df.index[-1].to_pydatetime().isoformat(),
+                summary=f"{self.symbol} @ {candle['timestamp'].to_pydatetime().isoformat()}\n{message}",
                 plot=plot,
             ),
             signal,
