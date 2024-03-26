@@ -3,6 +3,7 @@ from functools import partial
 import io
 from typing import Optional
 
+from matplotlib.pyplot import tight_layout
 import numpy as np
 import pandas as pd
 import mplfinance as mpf
@@ -80,6 +81,7 @@ class Strategy(metaclass=ABCMeta):
         mpf.plot(
             df,
             type="candle",
+            tight_layout=True,
             volume=True,
             figratio=(16, 10),
             style="tradingview",
