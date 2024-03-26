@@ -8,7 +8,7 @@ import mplfinance as mpf
 
 from logger import get_logger
 from trading.data import DataProvider
-from trading.signal.model import Analysis, Signal, LongEntry, ShortEntry
+from trading.signal import Analysis, Signal, LongEntry, ShortEntry
 
 
 logger = get_logger(__name__)
@@ -87,17 +87,20 @@ class Strategy(metaclass=ABCMeta):
         return plot
 
     def create_signal(self, df: pd.DataFrame) -> Optional[Signal]:
-        latest_candle = df.iloc[-1, :]
-        logger.debug("Latest candle", extra={"latest_candle": latest_candle.to_dict()})
+        candle = df.loc[df.index < self.data_provider.timeframe.is_finished()].iloc[-1]
+        logger.debug(
+            f"[O] {candle['open']} [H] {candle['high']} [L] {candle['low']} [C] {candle['close']}",
+            extra={"candle": candle.to_dict()},
+        )
 
-        long_entry = latest_candle[LongEntry.flag_col] == True
-        short_entry = latest_candle[ShortEntry.flag_col] == True
+        long_entry = candle[LongEntry.flag_col] == True
+        short_entry = candle[ShortEntry.flag_col] == True
 
         signal = None
         if long_entry and not short_entry:
-            signal = Signal(LongEntry, str(latest_candle["close"]))
+            signal = Signal(LongEntry, str(candle["close"]))
         elif short_entry and not long_entry:
-            signal = Signal(ShortEntry, str(latest_candle["close"]))
+            signal = Signal(ShortEntry, str(candle["close"]))
 
         return signal
 
