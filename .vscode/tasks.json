@@ -4,18 +4,29 @@
         {
             "label": "docker:build",
             "type": "shell",
-            "command": "docker-compose build"
+            "command": [
+                "COMMIT_HASH=$(git rev-parse --short HEAD)",
+                "docker compose build",
+            ]
         },
         {
             "label": "docker:push",
             "type": "shell",
-            "command": "docker-compose push",
+            "command": [
+                "export COMMIT_HASH=$(git rev-parse --short HEAD)",
+                "docker compose push",
+            ],
             "dependsOn": "docker:build"
         },
         {
-            "label": "echo:update-container",
+            "label": "deployment:update",
             "type": "shell",
-            "command": "echo gcloud compute instances update-container instance-1 --container-image=hieumdd/silver-flag-bot",
+            "command": [
+                "gcloud compute instances update-container",
+                "instance-2",
+                "--container-image $(COMMIT_HASH=$(git rev-parse --short HEAD) docker compose config | yq eval '.services.app.image')"
+            ],
+            "dependsOn": "docker:push"
         },
     ]
 }
