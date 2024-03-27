@@ -3,8 +3,6 @@ from functools import partial
 import io
 from typing import Optional
 
-from matplotlib.pyplot import tight_layout
-import numpy as np
 import pandas as pd
 import mplfinance as mpf
 
@@ -42,7 +40,7 @@ class Strategy(metaclass=ABCMeta):
 
     def generate_signals(self) -> pd.DataFrame:
         df = self.generate_indicators().copy()
-        df.loc[:, [Long.value_col, Short.value_col]] = (np.nan, np.nan)
+        df.loc[:, [Long.value_col, Short.value_col]] = (pd.NA, pd.NA)
         return self.populate_signals(df)
 
     def populate_subplots(self, df: pd.DataFrame) -> list[dict]:
@@ -60,7 +58,7 @@ class Strategy(metaclass=ABCMeta):
         )
 
         long_marker = f"{Long.tag}Marker"
-        df[long_marker] = np.nan
+        df[long_marker] = pd.NA
         df.loc[df[Long.value_col].notnull(), long_marker] = df["high"]
         long_signal_plot = (
             []
@@ -69,7 +67,7 @@ class Strategy(metaclass=ABCMeta):
         )
 
         short_marker = f"{Short.tag}Marker"
-        df[short_marker] = np.nan
+        df[short_marker] = pd.NA
         df.loc[df[Short.value_col].notnull(), short_marker] = df["low"]
         short_signal_plot = (
             []
@@ -98,8 +96,8 @@ class Strategy(metaclass=ABCMeta):
         message = f"[O] {candle['open']} [H] {candle['high']} [L] {candle['low']} [C] {candle['close']}"
         logger.debug(message, extra={"candle": candle.to_dict()})
 
-        long_entry = candle[Long.value_col] != np.nan
-        short_entry = candle[Short.value_col] != np.nan
+        long_entry = pd.isna(candle[Long.value_col])
+        short_entry = pd.isna(candle[Short.value_col])
 
         signal = None
         if long_entry and not short_entry:
