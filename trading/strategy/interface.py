@@ -3,6 +3,7 @@ from functools import partial
 import io
 from typing import Optional
 
+import numpy as np
 import pandas as pd
 import mplfinance as mpf
 
@@ -58,7 +59,7 @@ class Strategy(metaclass=ABCMeta):
         )
 
         long_marker = f"{Long.tag}Marker"
-        df[long_marker] = pd.NA
+        df[long_marker] = np.nan
         df.loc[df[Long.col].notnull(), long_marker] = df["high"]
         long_signal_plot = (
             []
@@ -67,7 +68,7 @@ class Strategy(metaclass=ABCMeta):
         )
 
         short_marker = f"{Short.tag}Marker"
-        df[short_marker] = pd.NA
+        df[short_marker] = np.nan
         df.loc[df[Short.col].notnull(), short_marker] = df["low"]
         short_signal_plot = (
             []
