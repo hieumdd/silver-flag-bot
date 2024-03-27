@@ -40,7 +40,7 @@ class Strategy(metaclass=ABCMeta):
 
     def generate_signals(self) -> pd.DataFrame:
         df = self.generate_indicators().copy()
-        df.loc[:, [Long.value_col, Short.value_col]] = (pd.NA, pd.NA)
+        df.loc[:, [Long.col, Short.col]] = (pd.NA, pd.NA)
         return self.populate_signals(df)
 
     def populate_subplots(self, df: pd.DataFrame) -> list[dict]:
@@ -59,19 +59,19 @@ class Strategy(metaclass=ABCMeta):
 
         long_marker = f"{Long.tag}Marker"
         df[long_marker] = pd.NA
-        df.loc[df[Long.value_col].notnull(), long_marker] = df["high"]
+        df.loc[df[Long.col].notnull(), long_marker] = df["high"]
         long_signal_plot = (
             []
-            if df[Long.value_col].isna().all()
+            if df[Long.col].isna().all()
             else [signal_plot(df[long_marker] + 0.3, marker=10, color="mediumseagreen")]
         )
 
         short_marker = f"{Short.tag}Marker"
         df[short_marker] = pd.NA
-        df.loc[df[Short.value_col].notnull(), short_marker] = df["low"]
+        df.loc[df[Short.col].notnull(), short_marker] = df["low"]
         short_signal_plot = (
             []
-            if df[Short.value_col].isna().all()
+            if df[Short.col].isna().all()
             else [signal_plot(df[short_marker] - 0.3, marker=11, color="lightcoral")]
         )
 
@@ -96,14 +96,14 @@ class Strategy(metaclass=ABCMeta):
         message = f"[O] {candle['open']} [H] {candle['high']} [L] {candle['low']} [C] {candle['close']}"
         logger.debug(message, extra={"candle": candle.to_dict()})
 
-        long_entry = pd.isna(candle[Long.value_col])
-        short_entry = pd.isna(candle[Short.value_col])
+        long_entry = pd.isna(candle[Long.col])
+        short_entry = pd.isna(candle[Short.col])
 
         signal = None
         if long_entry and not short_entry:
-            signal = Signal(Long, str(candle[Long.value_col]))
+            signal = Signal(Long, str(candle[Long.col]))
         elif short_entry and not long_entry:
-            signal = Signal(Short, str(candle[Short.value_col]))
+            signal = Signal(Short, str(candle[Short.col]))
 
         plot = self.create_plot(df, candles)
 

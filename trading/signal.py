@@ -10,7 +10,7 @@ class SignalType:
     emoji_short_code: str
 
     @property
-    def value_col(self):
+    def col(self):
         return f"{self.tag}Value"
 
 

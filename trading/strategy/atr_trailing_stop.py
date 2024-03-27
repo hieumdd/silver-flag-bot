@@ -60,13 +60,13 @@ class ATRTrailingStop(Strategy):
         df.loc[
             (df["SRC"] > df["ATR_TRAILING_STOP"])
             & (ta.cross(df["MA"], df["ATR_TRAILING_STOP"], above=True) == 1),
-            Long.value_col,
+            Long.col,
         ] = df["SRC"]
 
         df.loc[
             (df["SRC"] < df["ATR_TRAILING_STOP"])
             & (ta.cross(df["MA"], df["ATR_TRAILING_STOP"], above=False) == 1),
-            Short.value_col,
+            Short.col,
         ] = df["SRC"]
 
         return df
