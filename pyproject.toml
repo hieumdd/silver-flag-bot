@@ -13,7 +13,6 @@ cryptography = "^42.0.0"
 python-telegram-bot = { extras = ["job-queue"], version = "^20.7" }
 pandas = "^2.2.0"
 pandas-ta = "^0.3.14b0"
-pyarrow = "^15.0.0"
 emoji = "^2.10.0"
 apscheduler = "^3.10.4"
 matplotlib = "^3.8.2"
