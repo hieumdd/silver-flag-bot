@@ -7,7 +7,7 @@ from trading.strategy.interface import Strategy
 logger = get_logger(__name__)
 
 
-async def polling(context: ContextTypes.DEFAULT_TYPE):
+async def on_polling(context: ContextTypes.DEFAULT_TYPE):
     strategy: Strategy = context.job.data
     chat_id = context.job.chat_id
     logger.info(f"Polling strategy {strategy.__class__}")

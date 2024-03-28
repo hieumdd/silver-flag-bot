@@ -6,7 +6,7 @@ from logger import init_logger
 from trading.strategy.atr_trailing_stop import ATRTrailingStop
 from bot.error import on_error
 from bot.analyze import on_analyze
-from bot.polling import polling
+from bot.polling import on_polling
 
 init_logger()
 
@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     for trigger in strategy.data_provider.timeframe.crons():
         application.job_queue.run_custom(
-            polling,
+            on_polling,
             data=strategy,
             chat_id=chat_id,
             job_kwargs={"trigger": trigger},
