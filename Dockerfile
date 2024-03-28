@@ -11,7 +11,7 @@ ENV POETRY_VIRTUALENVS_IN_PROJECT true
 
 WORKDIR /app
 COPY poetry.lock pyproject.toml ./
-RUN pip install poetry && poetry install --without dev --all-extras --no-root --no-interaction --no-ansi
+RUN pip install poetry && poetry install --without dev --all-extras --no-interaction --no-ansi
 
 # 
 
