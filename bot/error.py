@@ -14,10 +14,10 @@ logger = get_logger(__name__)
 def on_error(chat_id: int):
     async def _on_error(update: Update, context: ContextTypes.DEFAULT_TYPE):
         error = context.error
-        error_formatted = traceback.format_exception_only(error).pop()
+        error_message = traceback.format_exception_only(error).pop()
         traceback_list = traceback.format_exception(None, error, error.__traceback__)
 
-        logger.error(error_formatted, exc_info=error)
+        logger.error(error_message, exc_info=error)
 
         with io.StringIO() as error_file:
             error_file.writelines(traceback_list)
@@ -27,7 +27,7 @@ def on_error(chat_id: int):
                 chat_id=chat_id,
                 document=error_file,
                 filename="error.log",
-                caption=error_formatted,
+                caption=f'<pre><code class="language-python">{error_message}</code></pre>',
                 parse_mode=ParseMode.HTML,
             )
 
