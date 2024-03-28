@@ -18,7 +18,7 @@ async def polling(context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_photo(
             chat_id=chat_id,
             photo=analysis.plot,
-            caption=signal.to_html(analysis.symbol),
+            caption=signal.to_html(),
             parse_mode="html",
         )
     else:

@@ -102,9 +102,9 @@ class Strategy(metaclass=ABCMeta):
 
         signal = None
         if long_entry and not short_entry:
-            signal = Signal(Long, str(candle[Long.col]))
+            signal = Signal(Long, self.symbol, str(candle[Long.col]))
         elif short_entry and not long_entry:
-            signal = Signal(Short, str(candle[Short.col]))
+            signal = Signal(Short, self.symbol, str(candle[Short.col]))
 
         plot = self.create_plot(df, candles)
 

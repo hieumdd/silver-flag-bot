@@ -21,9 +21,10 @@ Short = SignalType("Short", ":green_circle:")
 @dataclass
 class Signal:
     type_: SignalType
+    symbol: str
     value: str
 
-    def to_html(self, symbol: str):
+    def to_html(self):
         return emoji.emojize(
-            f"{self.type_.emoji_short_code} {symbol} @ <code>{self.value}</code> {self.type_.tag.upper()}"
+            f"{self.type_.emoji_short_code} {self.symbol} @ <code>{self.value}</code> {self.type_.tag.upper()}"
         )
