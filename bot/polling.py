@@ -26,5 +26,3 @@ async def on_polling(context: ContextTypes.DEFAULT_TYPE):
             caption=signal.to_html(),
             parse_mode=ParseMode.HTML,
         )
-    else:
-        logger.debug(f"Signal not found for strategy {strategy.__class__}")
