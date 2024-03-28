@@ -1,4 +1,5 @@
 from telegram.ext import ContextTypes
+from telegram.constants import ParseMode
 
 from logger import get_logger
 from trading.strategy.interface import Strategy
@@ -19,7 +20,7 @@ async def polling(context: ContextTypes.DEFAULT_TYPE):
             chat_id=chat_id,
             photo=analysis.plot,
             caption=signal.to_html(),
-            parse_mode="html",
+            parse_mode=ParseMode.HTML,
         )
     else:
         logger.debug(f"Signal not found for strategy {strategy.__class__}")

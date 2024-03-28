@@ -1,4 +1,5 @@
 from telegram import Update
+from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from logger import get_logger
@@ -19,7 +20,7 @@ def on_analyze(strategy: Strategy):
         await update.message.reply_photo(
             photo=analysis.plot,
             caption=analysis.to_html(),
-            parse_mode="html",
+            parse_mode=ParseMode.HTML,
         )
 
     return _on_analyze
