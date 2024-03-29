@@ -92,13 +92,14 @@ class Strategy(metaclass=ABCMeta):
 
     def analyze(self, candles: Optional[int] = 90) -> tuple[Analysis, Optional[Signal]]:
         df = self.generate_signals()
+        df = df.loc[~df[Long.col].isna()]
 
         candle = df.loc[df.index < self.data_provider.timeframe.is_finished()].iloc[-1]
         message = f"[O] {candle['open']} [H] {candle['high']} [L] {candle['low']} [C] {candle['close']}"
         logger.debug(message, extra={"candle": candle.to_dict()})
 
-        long_entry = pd.isna(candle[Long.col])
-        short_entry = pd.isna(candle[Short.col])
+        long_entry = not pd.isna(candle[Long.col])
+        short_entry = not pd.isna(candle[Short.col])
 
         signal = None
         if long_entry and not short_entry:
