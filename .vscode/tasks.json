@@ -13,7 +13,7 @@
             "label": "docker:push",
             "type": "shell",
             "command": [
-                "export COMMIT_HASH=$(git rev-parse --short HEAD)",
+                "COMMIT_HASH=$(git rev-parse --short HEAD)",
                 "docker compose push",
             ],
             "dependsOn": "docker:build"
