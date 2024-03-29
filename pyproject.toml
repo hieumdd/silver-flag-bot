@@ -3,6 +3,7 @@ name = "silver-flag-bot"
 version = "0.1"
 description = ""
 authors = ["HM <hieumdd@gmail.com>"]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "~3.11"
