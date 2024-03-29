@@ -107,11 +107,6 @@ class Strategy(metaclass=ABCMeta):
             signal = Signal(Short, self.symbol, str(candle[Short.col]))
 
         plot = self.create_plot(df, candles)
+        summary = f"{self.symbol} @ {candle['timestamp'].to_pydatetime().isoformat()}\n{message}"
 
-        return (
-            Analysis(
-                summary=f"{self.symbol} @ {candle['timestamp'].to_pydatetime().isoformat()}\n{message}",
-                plot=plot,
-            ),
-            signal,
-        )
+        return (Analysis(summary=summary, plot=plot), signal)
