@@ -92,7 +92,6 @@ class Strategy(metaclass=ABCMeta):
 
     def analyze(self, candles: Optional[int] = 90) -> tuple[Analysis, Optional[Signal]]:
         df = self.generate_signals()
-        df = df.loc[~df[Long.col].isna()]
 
         candle = df.loc[df.index < self.data_provider.timeframe.is_finished()].iloc[-1]
         message = f"[O] {candle['open']} [H] {candle['high']} [L] {candle['low']} [C] {candle['close']}"
