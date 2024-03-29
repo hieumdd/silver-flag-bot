@@ -15,7 +15,7 @@ class SignalType:
 
 
 Long = SignalType("Long", ":green_circle:")
-Short = SignalType("Short", ":green_circle:")
+Short = SignalType("Short", ":red_circle:")
 
 
 @dataclass
