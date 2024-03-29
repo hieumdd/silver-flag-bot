@@ -11,8 +11,8 @@ def init_logger():
         handler.setFormatter(JsonFormatter(format_, rename_fields))
 
 
-def get_logger(name: str):
+def get_logger(module_name: str):
     init_logger()
-    logger = logging.getLogger(name)
+    logger = logging.getLogger(module_name)
     logger.setLevel(logging.DEBUG)
     return logger
