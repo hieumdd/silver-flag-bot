@@ -30,8 +30,7 @@ class ATRTrailingStop(Strategy):
 
         df = df.dropna()
 
-        df["ATR_TRAILING_STOP"] = np.nan
-        df.loc[df.index[0], "ATR_TRAILING_STOP"] = 0.0
+        df["ATR_TRAILING_STOP"] = 0.0
 
         for i in range(1, len(df)):
             src = df.loc[df.index[i], "SRC"]
@@ -76,14 +75,14 @@ class ATRTrailingStop(Strategy):
             mpf.make_addplot(
                 df["ATR_TRAILING_STOP"],
                 panel=0,
-                width=1,
+                width=0.75,
                 secondary_y=False,
                 label="ATR Trailing Stop",
             ),
             mpf.make_addplot(
                 df["MA"],
                 panel=0,
-                width=1,
+                width=0.75,
                 linestyle="--",
                 secondary_y=False,
                 label="MA",
