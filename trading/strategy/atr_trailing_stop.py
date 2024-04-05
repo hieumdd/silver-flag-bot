@@ -1,4 +1,3 @@
-import numpy as np
 import pandas_ta as ta
 import mplfinance as mpf
 
@@ -11,7 +10,7 @@ from trading.strategy.interface import Strategy
 class ATRTrailingStop(Strategy):
     data_provider = IntradayDataProvider(TF_5MIN)
 
-    def __init__(self, symbol, atr_length=50, n_loss_sensitivity=2, ma_period=2):
+    def __init__(self, symbol, atr_length=10, n_loss_sensitivity=1, ma_period=2):
         super().__init__(symbol)
         self.atr_length = atr_length
         self.n_loss_sensitivity = n_loss_sensitivity
