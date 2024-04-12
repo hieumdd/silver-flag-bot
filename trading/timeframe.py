@@ -10,7 +10,7 @@ from apscheduler.triggers.cron import CronTrigger
 @dataclass
 class Timeframe:
     interval: str
-    finished_candle_threshold: timedelta
+    minimum_threshold: timedelta
     cron_hour: Callable[[str], str] = lambda x: x
     cron_minute: Callable[[str], str] = lambda x: x
 
@@ -30,11 +30,24 @@ class Timeframe:
 
     def is_finished(self) -> datetime:
         now = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).replace(tzinfo=None)
-        return now - self.finished_candle_threshold
+        return now - self.minimum_threshold
 
 
-TF_1MIN = Timeframe("1min", timedelta(minutes=1), lambda x: x, lambda _: "*")
-TF_5MIN = Timeframe("5min", timedelta(minutes=5), lambda x: x, lambda cron: f"{cron}/5")
+TF_1MIN = Timeframe(
+    interval="1min",
+    minimum_threshold=timedelta(minutes=1),
+    cron_hour=lambda x: x,
+    cron_minute=lambda _: "*",
+)
+TF_5MIN = Timeframe(
+    interval="5min",
+    minimum_threshold=timedelta(minutes=5),
+    cron_hour=lambda x: x,
+    cron_minute=lambda cron: f"{cron}/5",
+)
 TF_15MIN = Timeframe(
-    "15min", timedelta(minutes=15), lambda x: x, lambda cron: f"{cron}/15"
+    interval="15min",
+    minimum_threshold=timedelta(minutes=15),
+    cron_hour=lambda x: x,
+    cron_minute=lambda cron: f"{cron}/15",
 )
