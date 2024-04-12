@@ -9,7 +9,7 @@ logger = get_logger(__name__)
 
 async def on_polling(context: ContextTypes.DEFAULT_TYPE):
     strategy: Strategy = context.job.data
-    chat_id = context.job.chat_id
+    chat_id: int = context.job.chat_id
     logger.info(f"Polling strategy {strategy.__class__}")
 
     analysis, signal = strategy.analyze()

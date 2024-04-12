@@ -14,9 +14,7 @@ def on_analyze(strategy: Strategy):
         logger.info(f"Analyzing strategy {strategy.__class__}")
 
         await update.message.reply_chat_action(ChatAction.UPLOAD_PHOTO)
-
         analysis, _ = strategy.analyze()
-
         await update.message.reply_photo(
             photo=analysis.plot,
             caption=analysis.to_html(),
