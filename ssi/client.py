@@ -1,5 +1,6 @@
 from datetime import datetime, date
 import os
+import time
 
 import jwt
 import httpx
@@ -86,6 +87,10 @@ class SSIClient:
                 .get("data", [])
             )
 
-            return data if len(data) < page_size else [*data, *_request(page_index + 1)]
+            if len(data) < page_size:
+                return data
+
+            time.sleep(1)
+            return [*data, *_request(page_index + 1)]
 
         return _request()
