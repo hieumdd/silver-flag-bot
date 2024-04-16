@@ -64,7 +64,11 @@ class Strategy(metaclass=ABCMeta):
         long_signal_plot = (
             []
             if df[Long.col].isna().all()
-            else [signal_plot(df[long_marker] + 0.5, marker=r"$\uparrow$", color="mediumseagreen")]
+            else [
+                signal_plot(
+                    df[long_marker] + 0.5, marker=r"$\uparrow$", color="mediumseagreen"
+                )
+            ]
         )
 
         short_marker = f"{Short.tag}Marker"
@@ -73,7 +77,11 @@ class Strategy(metaclass=ABCMeta):
         short_signal_plot = (
             []
             if df[Short.col].isna().all()
-            else [signal_plot(df[short_marker] - 0.5, marker=r"$\downarrow$", color="lightcoral")]
+            else [
+                signal_plot(
+                    df[short_marker] - 0.5, marker=r"$\downarrow$", color="lightcoral"
+                )
+            ]
         )
 
         plot = io.BytesIO()
