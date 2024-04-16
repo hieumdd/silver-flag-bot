@@ -22,9 +22,9 @@ class Timeframe:
             timezone=ZoneInfo("Asia/Ho_Chi_Minh"),
         )
         return [
-            base_cron(hour=self.cron_hour("9-11"), minute=self.cron_minute("*")),
+            base_cron(hour=self.cron_hour("9-10"), minute=self.cron_minute("*")),
             base_cron(hour=self.cron_hour("11"), minute=self.cron_minute("0-30")),
-            base_cron(hour=self.cron_hour("13-14"), minute=self.cron_minute("*")),
+            base_cron(hour=self.cron_hour("13"), minute=self.cron_minute("*")),
             base_cron(hour=self.cron_hour("14"), minute=self.cron_minute("0-30")),
         ]
 
