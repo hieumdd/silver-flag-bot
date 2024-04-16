@@ -50,7 +50,7 @@ class ATRTrailingStop(Strategy):
 
             df.loc[df.index[i], "ATR_TRAILING_STOP"] = atr_trailing_stop
 
-        df["MA"] = ta.ema(df["SRC"], self.ma_period, talib=False)
+        df["MA"] = ta.ema(df["SRC"], self.ma_period)
 
         return df
 
