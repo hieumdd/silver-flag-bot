@@ -26,5 +26,5 @@ class Signal:
 
     def to_html(self):
         return emoji.emojize(
-            f"{self.type_.emoji_short_code} {self.type_.tag.upper()} {self.symbol} @ <code>{html.escape(self.value)}</code>"
+            f"{self.type_.emoji_short_code} {self.type_.tag.upper()} {self.symbol}"
         )
