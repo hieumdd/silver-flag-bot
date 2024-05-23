@@ -10,15 +10,23 @@ from trading.strategy.interface import Strategy
 class ATRTrailingStop(Strategy):
     data_provider = IntradayDataProvider(TF_5MIN)
 
-    def __init__(self, symbol, atr_length=10, n_loss_sensitivity=1, ma_period=2):
+    def __init__(
+        self,
+        symbol,
+        atr_length=10,
+        n_loss_sensitivity=1,
+        ma_period=2,
+        linreg_length=10,
+        linreg_offset=1,
+    ):
         super().__init__(symbol)
         self.atr_length = atr_length
         self.n_loss_sensitivity = n_loss_sensitivity
         self.ma_period = ma_period
+        self.linreg_length = linreg_length
+        self.linreg_offset = linreg_offset
 
     def populate_indicators(self, df):
-        df["SRC"] = df["open"]
-
         df["ATR"] = ta.atr(
             df["high"],
             df["low"],
@@ -26,11 +34,13 @@ class ATRTrailingStop(Strategy):
             length=self.atr_length,
         )
         df["NLOSS"] = df["ATR"] * self.n_loss_sensitivity
+        df["PRICE"] = df["open"]
+
+        df["SRC"] = ta.linreg(df["PRICE"], self.linreg_length, self.linreg_offset)
 
         df = df.dropna()
 
         df["ATR_TRAILING_STOP"] = 0.0
-
         for i in range(1, len(df)):
             src = df.loc[df.index[i], "SRC"]
             prev_src = df.loc[df.index[i - 1], "SRC"]
@@ -59,13 +69,13 @@ class ATRTrailingStop(Strategy):
             (df["SRC"] > df["ATR_TRAILING_STOP"])
             & (ta.cross(df["MA"], df["ATR_TRAILING_STOP"], above=True) == 1),
             Long.col,
-        ] = df["SRC"]
+        ] = df["PRICE"]
 
         df.loc[
             (df["SRC"] < df["ATR_TRAILING_STOP"])
             & (ta.cross(df["MA"], df["ATR_TRAILING_STOP"], above=False) == 1),
             Short.col,
-        ] = df["SRC"]
+        ] = df["PRICE"]
 
         return df
 
