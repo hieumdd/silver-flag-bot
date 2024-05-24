@@ -16,7 +16,7 @@ class ATRTrailingStop(Strategy):
         atr_length=10,
         n_loss_sensitivity=1,
         ma_period=2,
-        linreg_length=10,
+        linreg_length=2,
         linreg_offset=1,
     ):
         super().__init__(symbol)
@@ -36,7 +36,7 @@ class ATRTrailingStop(Strategy):
         df["NLOSS"] = df["ATR"] * self.n_loss_sensitivity
         df["PRICE"] = df["open"]
 
-        df["SRC"] = ta.linreg(df["PRICE"], self.linreg_length, self.linreg_offset)
+        df["SRC"] = ta.linreg(df["PRICE"], self.linreg_length, self.linreg_offset - 1)
 
         df = df.dropna()
 
