@@ -1,7 +1,9 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from functools import partial
 import io
 from typing import Optional
+from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
@@ -16,9 +18,14 @@ from trading.analysis import Analysis
 logger = get_logger(__name__)
 
 
-class Strategy(metaclass=ABCMeta):
+class Strategy(ABC):
     def __init__(self, symbol: str):
         self.symbol = symbol
+
+    @property
+    @abstractmethod
+    def params(cls) -> SimpleNamespace:
+        pass
 
     @property
     @abstractmethod
@@ -118,3 +125,16 @@ class Strategy(metaclass=ABCMeta):
         summary = f"{self.symbol} @ {candle['timestamp'].to_pydatetime().isoformat()}\n{message}"
 
         return (Analysis(summary=summary, plot=plot), signal)
+
+
+@dataclass
+class StrategyParams:
+    strategy: Strategy
+
+    def to_html(self):
+        params_dict = self.strategy.params.__dict__.items()
+        params_html = "\n".join(
+            [f"=== {self.strategy.__class__.__name__} ==="]
+            + [f"{key}: {value}" for key, value in params_dict]
+        )
+        return f'<pre><code class="language-yaml">{params_html}</code></pre>'

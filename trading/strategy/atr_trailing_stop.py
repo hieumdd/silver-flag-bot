@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pandas_ta as ta
 import mplfinance as mpf
 
@@ -9,34 +11,29 @@ from trading.strategy.interface import Strategy
 
 class ATRTrailingStop(Strategy):
     data_provider = IntradayDataProvider(TF_5MIN)
-
-    def __init__(
-        self,
-        symbol,
+    params = SimpleNamespace(
         atr_length=10,
         n_loss_sensitivity=1,
         ma_period=2,
         linreg_length=2,
         linreg_offset=1,
-    ):
-        super().__init__(symbol)
-        self.atr_length = atr_length
-        self.n_loss_sensitivity = n_loss_sensitivity
-        self.ma_period = ma_period
-        self.linreg_length = linreg_length
-        self.linreg_offset = linreg_offset
+    )
 
     def populate_indicators(self, df):
         df["ATR"] = ta.atr(
             df["high"],
             df["low"],
             df["close"],
-            length=self.atr_length,
+            length=self.params.atr_length,
         )
-        df["NLOSS"] = df["ATR"] * self.n_loss_sensitivity
+        df["NLOSS"] = df["ATR"] * self.params.n_loss_sensitivity
         df["PRICE"] = df["open"]
 
-        df["SRC"] = ta.linreg(df["PRICE"], self.linreg_length, self.linreg_offset - 1)
+        df["SRC"] = ta.linreg(
+            df["PRICE"],
+            self.params.linreg_length,
+            self.params.linreg_offset - 1,
+        )
 
         df = df.dropna()
 
@@ -60,7 +57,7 @@ class ATRTrailingStop(Strategy):
 
             df.loc[df.index[i], "ATR_TRAILING_STOP"] = atr_trailing_stop
 
-        df["MA"] = ta.ema(df["SRC"], self.ma_period)
+        df["MA"] = ta.ema(df["SRC"], self.params.ma_period)
 
         return df
 
