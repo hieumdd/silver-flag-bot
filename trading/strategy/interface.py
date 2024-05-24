@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from functools import partial
 import io
 from typing import Optional
@@ -124,3 +125,16 @@ class Strategy(ABC):
         summary = f"{self.symbol} @ {candle['timestamp'].to_pydatetime().isoformat()}\n{message}"
 
         return (Analysis(summary=summary, plot=plot), signal)
+
+
+@dataclass
+class StrategyParams:
+    strategy: Strategy
+
+    def to_html(self):
+        params_dict = self.strategy.params.__dict__.items()
+        params_html = "\n".join(
+            [f"=== {self.strategy.__class__.__name__} ==="]
+            + [f"{key}: {value}" for key, value in params_dict]
+        )
+        return f'<pre><code class="language-yaml">{params_html}</code></pre>'
