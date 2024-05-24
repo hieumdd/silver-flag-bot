@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pandas_ta as ta
 import mplfinance as mpf
 
@@ -9,10 +11,7 @@ from trading.strategy.interface import Strategy
 
 class MACDVWAP(Strategy):
     data_provider = IntradayDataProvider(TF_1MIN)
-
-    def __init__(self, symbol: str, adx_threshold=25):
-        super().__init__(symbol)
-        self.adx_threshold = adx_threshold
+    params = SimpleNamespace(adx_threshold=25)
 
     def populate_indicators(self, df):
         df[["MACD", "MACD_H", "MACD_S"]] = ta.macd(df["close"])
@@ -25,14 +24,14 @@ class MACDVWAP(Strategy):
         df.loc[
             (ta.cross(df["MACD"], df["MACD_S"]) == 1)
             & (df["close"] > df["VWAP"])
-            & (df["ADX"] > self.adx_threshold),
+            & (df["ADX"] > self.params.adx_threshold),
             Long.col,
         ] = df["close"]
 
         df.loc[
             (ta.cross(df["MACD"], df["MACD_S"], above=False) == 1)
             & (df["close"] < df["VWAP"])
-            & (df["ADX"] > self.adx_threshold),
+            & (df["ADX"] > self.params.adx_threshold),
             Short.col,
         ] = df["close"]
 

@@ -1,7 +1,8 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from functools import partial
 import io
 from typing import Optional
+from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
@@ -16,9 +17,14 @@ from trading.analysis import Analysis
 logger = get_logger(__name__)
 
 
-class Strategy(metaclass=ABCMeta):
+class Strategy(ABC):
     def __init__(self, symbol: str):
         self.symbol = symbol
+
+    @property
+    @abstractmethod
+    def params(cls) -> SimpleNamespace:
+        pass
 
     @property
     @abstractmethod
