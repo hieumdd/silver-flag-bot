@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import pandas_ta as ta
 
 from trading.timeframe import TF_1MIN
-from trading.data import IntradayDataProvider
+from trading.data_provider import IntradayDataProvider
 from trading.signal import Long, Short
 from trading.strategy.interface import Strategy
 

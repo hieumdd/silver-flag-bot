@@ -10,7 +10,7 @@ import pandas as pd
 import mplfinance as mpf
 
 from logger import get_logger
-from trading.data import DataProvider
+from trading.data_provider import DataProvider
 from trading.signal import Signal, Long, Short
 from trading.analysis import Analysis
 
