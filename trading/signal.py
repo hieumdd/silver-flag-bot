@@ -23,5 +23,5 @@ class Signal:
         return emoji.emojize(f"{self.emoji_code} {self.tag.upper()} {self.symbol}")
 
 
-Long = partial(tag="Long", emoji_code=":green_circle:")
-Short = partial(tag="Short", emoji_code=":red_circle:")
+Long = partial(Signal, tag="Long", emoji_code=":green_circle:")
+Short = partial(Signal, tag="Short", emoji_code=":red_circle:")
