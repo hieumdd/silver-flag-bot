@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import partial
 import io
-from typing import Optional
+from typing import ClassVar, Optional
 from types import SimpleNamespace
 
 import numpy as np
@@ -21,16 +21,8 @@ logger = get_logger(__name__)
 @dataclass
 class Strategy(ABC):
     symbol: str
-
-    @property
-    @abstractmethod
-    def data_provider(cls) -> DataProvider:
-        pass
-
-    @property
-    @abstractmethod
-    def params(cls) -> SimpleNamespace:
-        pass
+    data_provider: ClassVar[DataProvider]
+    params: ClassVar[SimpleNamespace]
 
     def get_data(self):
         return self.data_provider.get(self.symbol)
