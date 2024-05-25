@@ -4,7 +4,7 @@ import pandas_ta as ta
 import mplfinance as mpf
 
 from trading.timeframe import TF_5MIN
-from trading.data import IntradayDataProvider
+from trading.data_provider import IntradayDataProvider
 from trading.signal import Long, Short
 from trading.strategy.interface import Strategy
 
@@ -65,13 +65,13 @@ class ATRTrailingStop(Strategy):
         df.loc[
             (df["SRC"] > df["ATR_TRAILING_STOP"])
             & (ta.cross(df["MA"], df["ATR_TRAILING_STOP"], above=True) == 1),
-            Long.col,
+            Long.value_col(),
         ] = df["PRICE"]
 
         df.loc[
             (df["SRC"] < df["ATR_TRAILING_STOP"])
             & (ta.cross(df["MA"], df["ATR_TRAILING_STOP"], above=False) == 1),
-            Short.col,
+            Short.value_col(),
         ] = df["PRICE"]
 
         return df

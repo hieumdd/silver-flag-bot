@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import pandas_ta as ta
 
 from trading.timeframe import TF_1MIN
-from trading.data import IntradayDataProvider
+from trading.data_provider import IntradayDataProvider
 from trading.signal import Long, Short
 from trading.strategy.interface import Strategy
 
@@ -16,7 +16,7 @@ class MultiMA(Strategy):
 
     def populate_indicators(self, df):
         df["RSI"] = ta.rsi(df["close"])
-        df["RSI_CROSS_ABOVE"] = ta.cross_value(df["RSI"], 50)
+        df["RSI_CROSS_ABOVE"] = ta.cross_value(df["RSI"], 50, above=True)
         df["RSI_CROSS_BELOW"] = ta.cross_value(df["RSI"], 50, above=False)
         for length in self.params.ma_ranges:
             df[f"EMA_{length}"] = ta.ema(df["close"], length=length)
@@ -33,7 +33,7 @@ class MultiMA(Strategy):
                 ]
                 + [df["RSI_CROSS_ABOVE"] == 1],
             ),
-            Long.col,
+            Long.value_col(),
         ] = df["close"]
 
         df.loc[
@@ -45,7 +45,7 @@ class MultiMA(Strategy):
                 ]
                 + [df["RSI_CROSS_BELOW"] == 1],
             ),
-            Short.col,
+            Short.value_col(),
         ] = df["close"]
 
         return df

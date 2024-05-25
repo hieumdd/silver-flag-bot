@@ -4,7 +4,7 @@ import pandas_ta as ta
 import mplfinance as mpf
 
 from trading.timeframe import TF_1MIN
-from trading.data import IntradayDataProvider
+from trading.data_provider import IntradayDataProvider
 from trading.signal import Long, Short
 from trading.strategy.interface import Strategy
 
@@ -22,17 +22,17 @@ class MACDVWAP(Strategy):
 
     def populate_signals(self, df):
         df.loc[
-            (ta.cross(df["MACD"], df["MACD_S"]) == 1)
+            (ta.cross(df["MACD"], df["MACD_S"], above=True) == 1)
             & (df["close"] > df["VWAP"])
             & (df["ADX"] > self.params.adx_threshold),
-            Long.col,
+            Long.value_col(),
         ] = df["close"]
 
         df.loc[
             (ta.cross(df["MACD"], df["MACD_S"], above=False) == 1)
             & (df["close"] < df["VWAP"])
             & (df["ADX"] > self.params.adx_threshold),
-            Short.col,
+            Short.value_col(),
         ] = df["close"]
 
         return df

@@ -1,29 +1,34 @@
+from abc import ABC
 from dataclasses import dataclass
+from typing import ClassVar
 
 import emoji
 
 
 @dataclass
-class SignalType:
-    tag: str
-    emoji_short_code: str
+class Signal(ABC):
+    tag: ClassVar[str]
+    emoji_code: ClassVar[str]
 
-    @property
-    def col(self):
-        return f"{self.tag}Value"
+    @classmethod
+    def value_col(cls):
+        return f"{cls.tag}Value"
 
+    @classmethod
+    def marker_col(cls):
+        return f"{cls.tag}Marker"
 
-Long = SignalType("Long", ":green_circle:")
-Short = SignalType("Short", ":red_circle:")
+    def to_html(self):
+        return emoji.emojize(f"{self.emoji_code} {self.tag.upper()} {self.symbol}")
 
 
 @dataclass
-class Signal:
-    type_: SignalType
-    symbol: str
-    value: str
+class Long(Signal):
+    tag = "Long"
+    emoji_code = ":green_circle:"
 
-    def to_html(self):
-        return emoji.emojize(
-            f"{self.type_.emoji_short_code} {self.type_.tag.upper()} {self.symbol}"
-        )
+
+@dataclass
+class Short(Signal):
+    tag = "Short"
+    emoji_code = ":red_circle:"
