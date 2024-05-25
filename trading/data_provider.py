@@ -1,6 +1,7 @@
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
+from functools import partial
+from typing import Callable
 import pandas as pd
 
 from ssi.client import SSIClient
@@ -8,14 +9,10 @@ from trading.timeframe import Timeframe
 
 
 @dataclass
-class DataProvider(ABC):
+class DataProvider:
     timeframe: Timeframe
+    date_ranges: Callable[[], pd.DatetimeIndex]
     client = SSIClient()
-
-    @property
-    @abstractmethod
-    def date_ranges(self) -> pd.DatetimeIndex:
-        pass
 
     def get(self, symbol: str) -> pd.DataFrame:
         ohlc_columns = {
@@ -26,7 +23,7 @@ class DataProvider(ABC):
             "volume": "sum",
         }
 
-        start_date, *_, end_date = self.date_ranges
+        start_date, *_, end_date = self.date_ranges()
         data = self.client.get_intraday(symbol, start_date, end_date)
 
         df = pd.DataFrame(data).drop_duplicates()
@@ -55,6 +52,7 @@ class DataProvider(ABC):
         return df
 
 
-@dataclass
-class IntradayDataProvider(DataProvider):
-    date_ranges = pd.bdate_range(end=datetime.today().date(), periods=7)
+IntradayDataProvider = partial(
+    DataProvider,
+    date_ranges=lambda: pd.bdate_range(end=datetime.today().date(), periods=7),
+)
