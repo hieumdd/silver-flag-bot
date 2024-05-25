@@ -17,19 +17,18 @@ from trading.analysis import Analysis
 
 logger = get_logger(__name__)
 
-
+@dataclass
 class Strategy(ABC):
-    def __init__(self, symbol: str):
-        self.symbol = symbol
-
-    @property
-    @abstractmethod
-    def params(cls) -> SimpleNamespace:
-        pass
+    symbol: str
 
     @property
     @abstractmethod
     def data_provider(cls) -> DataProvider:
+        pass
+
+    @property
+    @abstractmethod
+    def params(cls) -> SimpleNamespace:
         pass
 
     def get_data(self):
