@@ -33,7 +33,7 @@ class MultiMA(Strategy):
                 ]
                 + [df["RSI_CROSS_ABOVE"] == 1],
             ),
-            Long.value_col,
+            Long.value_col(),
         ] = df["close"]
 
         df.loc[
@@ -45,7 +45,7 @@ class MultiMA(Strategy):
                 ]
                 + [df["RSI_CROSS_BELOW"] == 1],
             ),
-            Short.value_col,
+            Short.value_col(),
         ] = df["close"]
 
         return df
