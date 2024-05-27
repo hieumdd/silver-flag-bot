@@ -2973,7 +2973,17 @@ docs = ["Sphinx (>=6.0)", "myst-parser (>=2.0.0)", "sphinx-rtd-theme (>=1.1.0)"]
 optional = ["python-socks", "wsaccel"]
 test = ["websockets"]
 
+[[package]]
+name = "yattag"
+version = "1.15.2"
+description = "Generate HTML or XML in a pythonic way. Pure python alternative to web template engines.Can fill HTML forms with default values and error messages."
+optional = false
+python-versions = "*"
+files = [
+    {file = "yattag-1.15.2.tar.gz", hash = "sha256:aad9f540bd22dc503e5b5506cc47856facf081aa71fd35f727371b63e1e402bf"},
+]
+
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11"
-content-hash = "052ec5be46bf3bf8bedd7d952f74745d0b1a0be94423cc49f01859fce4656f17"
+content-hash = "023877dc7797f0c7ce48d56e2c0e0fbbb823c179909afabd56f3e15725a0d527"

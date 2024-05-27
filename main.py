@@ -2,14 +2,12 @@ import os
 
 from telegram.ext import Application, CommandHandler
 
-from logger import init_logger
+import logger
 from trading.strategy.atr_trailing_stop import ATRTrailingStop
 from bot.error import on_error
 from bot.analyze import on_analyze
 from bot.params import on_params
 from bot.polling import on_polling
-
-init_logger()
 
 if __name__ == "__main__":
     strategy = ATRTrailingStop("VN30F1M")
@@ -32,9 +30,7 @@ if __name__ == "__main__":
 
     for trigger in strategy.data_provider.timeframe.crons():
         application.job_queue.run_custom(
-            on_polling,
-            data=strategy,
-            chat_id=chat_id,
+            on_polling(strategy, chat_id),
             job_kwargs={"trigger": trigger},
         )
 

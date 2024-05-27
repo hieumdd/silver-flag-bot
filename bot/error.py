@@ -4,6 +4,7 @@ import traceback
 from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
+from yattag import Doc
 
 from logger import get_logger
 
@@ -23,11 +24,16 @@ def on_error(chat_id: int):
             error_file.writelines(traceback_list)
             error_file.seek(0)
 
+            doc, tag, text = Doc().tagtext()
+            with tag("pre"):
+                with tag("code", klass="language-python"):
+                    text(error_message)
+
             await context.bot.send_document(
                 chat_id=chat_id,
                 document=error_file,
                 filename="error.log",
-                caption=f'<pre><code class="language-python">{error_message}</code></pre>',
+                caption=doc.getvalue(),
                 parse_mode=ParseMode.HTML,
             )
 
