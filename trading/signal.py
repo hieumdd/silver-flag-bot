@@ -6,6 +6,9 @@ import emoji
 
 @dataclass
 class Signal(ABC):
+    symbol: str
+    value: str
+
     def __init_subclass__(cls, tag: str, emoji_code: str) -> None:
         cls.tag = tag
         cls.emoji_code = emoji_code
@@ -16,11 +19,9 @@ class Signal(ABC):
         return emoji.emojize(f"{self.emoji_code} {self.tag.upper()} {self.symbol}")
 
 
-@dataclass
 class Long(Signal, tag="Long", emoji_code=":green_circle:"):
     pass
 
 
-@dataclass
 class Short(Signal, tag="Short", emoji_code=":red_circle:"):
     pass
