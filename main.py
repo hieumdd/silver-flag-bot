@@ -2,14 +2,12 @@ import os
 
 from telegram.ext import Application, CommandHandler
 
-from logger import init_logger
+import logger
 from trading.strategy.atr_trailing_stop import ATRTrailingStop
 from bot.error import on_error
 from bot.analyze import on_analyze
 from bot.params import on_params
 from bot.polling import on_polling
-
-init_logger()
 
 if __name__ == "__main__":
     strategy = ATRTrailingStop("VN30F1M")
