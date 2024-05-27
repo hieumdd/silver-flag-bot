@@ -13,16 +13,7 @@ class DataProvider:
     client = SSIClient()
 
     @abstractmethod
-    def date_ranges(self) -> pd.DatetimeIndex:
-        pass
-
-    @abstractmethod
-    def load(
-        self,
-        symbol: str,
-        start_date: datetime,
-        end_date: datetime,
-    ) -> pd.DataFrame:
+    def load(self, symbol: str) -> pd.DataFrame:
         pass
 
     def get(self, symbol: str) -> pd.DataFrame:
@@ -34,9 +25,7 @@ class DataProvider:
             "volume": "sum",
         }
 
-        start_date, *_, end_date = self.date_ranges()
-        data = self.load(symbol, start_date, end_date)
-
+        data = self.load(symbol)
         df = pd.DataFrame(data).drop_duplicates()
         df["timestamp"] = pd.DatetimeIndex(
             df.apply(
@@ -64,8 +53,9 @@ class DataProvider:
 
 
 class IntradayDataProvider(DataProvider):
-    def date_ranges(self) -> pd.DatetimeIndex:
-        return pd.bdate_range(end=datetime.today().date(), periods=7)
-
-    def load(self, symbol, start_date, end_date):
+    def load(self, symbol):
+        start_date, *_, end_date = pd.bdate_range(
+            end=datetime.today().date(),
+            periods=7,
+        )
         return self.client.get_intraday(symbol, start_date, end_date)
