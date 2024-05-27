@@ -30,9 +30,7 @@ if __name__ == "__main__":
 
     for trigger in strategy.data_provider.timeframe.crons():
         application.job_queue.run_custom(
-            on_polling,
-            data=strategy,
-            chat_id=chat_id,
+            on_polling(strategy, chat_id),
             job_kwargs={"trigger": trigger},
         )
 
