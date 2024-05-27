@@ -69,7 +69,7 @@ class MACDVWAP(Strategy):
                 label="ADX",
             ),
             mpf.make_addplot(
-                df["ADX"].apply(lambda _: self.adx_threshold),
+                df["ADX"].apply(lambda _: self.params.adx_threshold),
                 panel=3,
                 width=1,
                 linestyle="--",
