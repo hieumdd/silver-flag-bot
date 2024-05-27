@@ -3,7 +3,8 @@ from telegram.constants import ChatAction, ParseMode
 from telegram.ext import ContextTypes
 
 from logger import get_logger
-from trading.strategy.interface import Strategy, StrategyParams
+from trading.strategy.interface import Strategy
+from trading.strategy_params.strategy_params import StrategyParams
 
 
 logger = get_logger(__name__)
