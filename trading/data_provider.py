@@ -16,6 +16,15 @@ class DataProvider:
     def date_ranges(self) -> pd.DatetimeIndex:
         pass
 
+    @abstractmethod
+    def load(
+        self,
+        symbol: str,
+        start_date: datetime,
+        end_date: datetime,
+    ) -> pd.DataFrame:
+        pass
+
     def get(self, symbol: str) -> pd.DataFrame:
         ohlc_columns = {
             "open": "first",
@@ -26,7 +35,7 @@ class DataProvider:
         }
 
         start_date, *_, end_date = self.date_ranges()
-        data = self.client.get_intraday(symbol, start_date, end_date)
+        data = self.load(symbol, start_date, end_date)
 
         df = pd.DataFrame(data).drop_duplicates()
         df["timestamp"] = pd.DatetimeIndex(
@@ -57,3 +66,6 @@ class DataProvider:
 class IntradayDataProvider(DataProvider):
     def date_ranges(self) -> pd.DatetimeIndex:
         return pd.bdate_range(end=datetime.today().date(), periods=7)
+
+    def load(self, symbol, start_date, end_date):
+        return self.client.get_intraday(symbol, start_date, end_date)
