@@ -5,6 +5,7 @@ import io
 from typing import ClassVar, Optional
 from types import SimpleNamespace
 
+import emoji
 import numpy as np
 import pandas as pd
 import mplfinance as mpf
@@ -125,9 +126,8 @@ class StrategyParams:
     strategy: Strategy
 
     def to_html(self):
+        strategy_name = self.strategy.__class__.__name__
+        strategy_html = emoji.emojize(f":blue_circle: {strategy_name}")
         params_dict = self.strategy.params.__dict__.items()
-        params_html = "\n".join(
-            [f"=== {self.strategy.__class__.__name__} ==="]
-            + [f"{key}: {value}" for key, value in params_dict]
-        )
-        return f'<pre><code class="language-yaml">{params_html}</code></pre>'
+        params_html = "\n".join([f"{key}: {value}" for key, value in params_dict])
+        return f'{strategy_html}<pre><code class="language-yaml">{params_html}</code></pre>'
