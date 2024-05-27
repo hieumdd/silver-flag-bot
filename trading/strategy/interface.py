@@ -110,9 +110,9 @@ class Strategy(ABC):
 
         signal = None
         if long_entry and not short_entry:
-            signal = Long(self.symbol, str(candle[Long.value_col()()]))
+            signal = Long(self.symbol, str(candle[Long.value_col()]))
         elif short_entry and not long_entry:
-            signal = Short(self.symbol, str(candle[Short.value_col()()]))
+            signal = Short(self.symbol, str(candle[Short.value_col()]))
 
         plot = self.create_plot(df, candles)
         summary = f"{self.symbol} @ {candle['timestamp'].to_pydatetime().isoformat()}\n{message}"
