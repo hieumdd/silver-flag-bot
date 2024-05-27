@@ -25,14 +25,14 @@ class MACDVWAP(Strategy):
             (ta.cross(df["MACD"], df["MACD_S"], above=True) == 1)
             & (df["close"] > df["VWAP"])
             & (df["ADX"] > self.params.adx_threshold),
-            Long.value_col(),
+            Long.value_col,
         ] = df["close"]
 
         df.loc[
             (ta.cross(df["MACD"], df["MACD_S"], above=False) == 1)
             & (df["close"] < df["VWAP"])
             & (df["ADX"] > self.params.adx_threshold),
-            Short.value_col(),
+            Short.value_col,
         ] = df["close"]
 
         return df
